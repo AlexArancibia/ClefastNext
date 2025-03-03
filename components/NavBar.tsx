@@ -25,7 +25,7 @@ export function Navbar() {
   const [isSearchVisible, setIsSearchVisible] = React.useState(false)
 
   return (
-    <nav className="bg-background border-b sticky top-0 z-50">
+    <nav className="bg-background border-b sticky top-0 z-[190]">
       <div className="container-section py-3">
         <div className="content-section">
           <div className="flex items-center justify-between">

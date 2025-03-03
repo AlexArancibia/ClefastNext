@@ -27,7 +27,7 @@ body {
     --popover: 0 0% 100%;
     --popover-foreground: 209 81% 11%;
 
-    --primary: 111 41% 41%;
+    --primary: 111 37% 41%;
     --primary-foreground: 355.7 100% 97.3%;
 
     --secondary: 209 81% 11%;
@@ -111,8 +111,10 @@ body {
   }
 
   h1 {
-    @apply text-2xl      /* Móvil por defecto */
-           md:text-3xl   /* Tablets y pantallas medianas */
+    @apply text-3xl      /* Móvil por defecto */
+           md:text-4xl   /* Tablets y pantallas medianas */
+           lg:text-5xl 
+           xl:text-6xl
 
            font-bold 
            tracking-tight 
@@ -120,10 +122,10 @@ body {
   }
   
   h2 {
-    @apply text-xl       /* Móvil por defecto */
+    @apply text-2xl       /* Móvil por defecto */
            md:text-2xl   /* Tablets y pantallas medianas */
-
-           font-semibold 
+           lg:text-3xl 
+           font-bold 
            tracking-tight 
            leading-[1.1];
   }
@@ -157,9 +159,9 @@ body {
   
   h6 {
     @apply text-xs       /* Móvil por defecto */
-           md:text-base  /* Tablets y pantallas medianas */
-           lg:text-lg    /* Pantallas grandes */
-           font-semibold 
+           md:text-sm  /* Tablets y pantallas medianas */
+           lg:text-base    /* Pantallas grandes */
+           font-medium 
            tracking-tight 
            leading-[1.4];
   }
@@ -167,8 +169,8 @@ body {
 
   p {
     @apply  text-sm       /* Móvil por defecto */
-              md:text-base  /* Tablets y pantallas medianas */
-              lg:text-base     /* Pantallas grandes */
+              md:text-sm  /* Tablets y pantallas medianas */
+              lg:text-sm     /* Pantallas grandes */
               font-normal 
               tracking-tight 
               leading-[1.4];
