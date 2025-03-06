@@ -9,6 +9,6 @@ export interface VariantPrice extends Timestamps {
   currency: Currency
   currencyId: string
   price: number
-  originalPrice?: number
+  position: number
 }
 

@@ -1,15 +1,16 @@
 "use client"
 
-import * as React from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { Menu, Search, ShoppingCart, User } from "lucide-react"
-
+import { Menu, Search, ShoppingCart, User, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
+import { useState } from "react"
+import { useCartStore } from "@/stores/cartStore"
+import { useMainStore } from "@/stores/mainStore"
 
 const navItems = [
   { name: "Inicio", href: "/" },
@@ -22,10 +23,19 @@ const navItems = [
 
 export function Navbar() {
   const pathname = usePathname()
-  const [isSearchVisible, setIsSearchVisible] = React.useState(false)
+  const [isSearchVisible, setIsSearchVisible] = useState(false)
+  const { items, removeItem } = useCartStore()
+  const { shopSettings } = useMainStore()
+  const defaultCurrency = shopSettings[0]?.defaultCurrency
+
+  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
+  const totalPrice = items.reduce((sum, item) => {
+    const price = item.variant.prices.find((p) => p.currencyId === defaultCurrency?.id)?.price || 0
+    return sum + price * item.quantity
+  }, 0)
 
   return (
-    <nav className="bg-background border-b sticky top-0 z-[190]">
+    <nav className="bg-background/50 backdrop-blur-md border-b sticky top-0 z-[180]">
       <div className="container-section py-3">
         <div className="content-section">
           <div className="flex items-center justify-between">
@@ -60,53 +70,89 @@ export function Navbar() {
             </div>
 
             {/* Search and Icons */}
-            <div className="flex items-center justify-end w-3/4 lg:w-1/3 xl:w-1/4 gap-2">
-              {/* Search Bar - Desktop */}
-              <div className="hidden lg:block relative w-full max-w-[200px] xl:max-w-[220px]">
-                <Input
-                  type="search"
-                  placeholder="Buscar Productos"
-                  className="pl-10 w-full bg-gray-100 border-border focus-visible:ring-primary"
-                  aria-label="Buscar productos"
-                />
-                <Search
-                  className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-secondary"
-                  aria-hidden="true"
-                />
-              </div>
-
-              {/* Search Toggle - Mobile */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="lg:hidden text-secondary hover:text-primary hover:bg-secondary/10"
-                onClick={() => setIsSearchVisible(!isSearchVisible)}
-                aria-label="Buscar"
-              >
-                <Search className="h-5 w-5" aria-hidden="true" />
-              </Button>
-
-              {/* Cart Icon */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="relative text-secondary hover:text-primary hover:bg-secondary/10"
-                aria-label="Carrito de compras"
-              >
-                <ShoppingCart className="h-5 w-5" aria-hidden="true" />
-                <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  3
-                </span>
-              </Button>
+            <div className="flex items-center justify-end w-3/4 lg:w-1/3 xl:w-1/4 gap-4">
+              {/* Cart Icon and Drawer */}
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="relative text-secondary hover:text-primary hover:bg-secondary/10"
+                    aria-label="Carrito de compras"
+                  >
+                    <ShoppingCart className="h-5 w-5" aria-hidden="true" />
+                    {totalItems > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                        {totalItems}
+                      </span>
+                    )}
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[350px] sm:w-[400px] bg-background">
+                  <SheetHeader>
+                    <SheetTitle ></SheetTitle>
+                  </SheetHeader>
+                  <div className="  flex flex-col h-full">
+                    <div className="flex-grow overflow-y-auto">
+                      {items.length === 0 ? (
+                        <p className="text-center text-muted-foreground">Tu carrito está vacío</p>
+                      ) : (
+                        items.map((item) => (
+                          <div key={item.variant.id} className="flex items-center gap-4 py-2 border-b">
+                            <Image
+                              src={item.product.imageUrls[0] || "/placeholder.svg"}
+                              alt={item.product.title}
+                              width={50}
+                              height={50}
+                              className="object-cover rounded"
+                            />
+                            <div className="flex-1">
+                              <h4 className="font-medium text-base">{item.product.title}</h4>
+                              <p className="text-sm text-muted-foreground">
+                                Cantidad: {item.quantity} x {defaultCurrency?.symbol}
+                                {Number(item.variant.prices.find((p) => p.currencyId === defaultCurrency?.id)?.price).toFixed(2)}
+                              </p>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removeItem(item.variant.id)}
+                              aria-label="Eliminar producto"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                    {items.length > 0 && (
+                      <div className="mt-auto pt-4 border-t">
+                        <p className="font-semibold text-lg mb-4">
+                          Total: {defaultCurrency?.symbol}
+                          {totalPrice.toFixed(2)}
+                        </p>
+                        <div className="flex gap-2">
+                          <Button asChild className="flex-1" variant="outline">
+                            <Link href="/cart">Ver Carrito</Link>
+                          </Button>
+                          <Button asChild className="flex-1">
+                            <Link href="/checkout">Proceder a Pagar</Link>
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </SheetContent>
+              </Sheet>
 
               {/* User Icon - Desktop */}
               <Button
                 variant="ghost"
-                size="icon"
-                className="hidden sm:flex text-secondary hover:text-primary hover:bg-secondary/10"
+                className="hidden sm:flex bg-primary text-white hover:text-primary font-normal text-[13px] hover:bg-secondary/10 px-3"
                 aria-label="Perfil de usuario"
               >
                 <User className="h-5 w-5" aria-hidden="true" />
+                Iniciar Sesión
               </Button>
 
               {/* Mobile Menu */}

@@ -1,3 +1,4 @@
+ 
 import type React from "react"
 import type { Metadata } from "next"
 import { Poppins } from "next/font/google"
@@ -6,6 +7,8 @@ import { Navbar } from "@/components/NavBar"
 import { Footer } from "@/components/Footer"
 import { WhatsAppButton } from "@/components/WhatsappButton"
 import { Toaster } from "@/components/ui/sonner"
+import { useInitializer } from "@/hooks/useInitializer"
+import { ClientInitializer } from "@/components/ClientInitializer"
 
  
 export const metadata: Metadata = {
@@ -18,12 +21,14 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+ 
   return (
     <html lang="es">
       
       <body className={`antialiased`}>
       <Navbar />
-        
+      <ClientInitializer />
+      <Toaster />
         {children}
         <Footer />
         <WhatsAppButton />

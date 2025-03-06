@@ -42,7 +42,7 @@ export function Footer() {
       {/* Pre-footer CTA Section with Form */}
       {!isContactPage && (
       <motion.section
-        className=" bg-[url('/gradient3.png')] bg-center bg-cover py-12 relative overflow-hidden"
+        className=" bg-gray-100 bg-center bg-cover py-12 relative overflow-hidden"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true }}

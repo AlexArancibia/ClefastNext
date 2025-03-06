@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import Image from "next/image"
 import Link from "next/link"
 import { motion } from "framer-motion"
@@ -7,30 +9,53 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ShoppingCart } from "lucide-react"
 import type { Product } from "@/types/product"
+import { useCartStore } from "@/stores/cartStore"
+import { useMainStore } from "@/stores/mainStore"
+import { toast } from "sonner"
 
 interface ProductCardProps {
   product: Product
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const mainVariant = product.variants[0]
-  const mainPrice = mainVariant.prices[0]
-  const price = mainPrice.price
-  const originalPrice = mainPrice.originalPrice
+  const { addItem } = useCartStore()
+  const { shopSettings } = useMainStore()
 
-  const discount = originalPrice ? Math.round(((originalPrice - price) / originalPrice) * 100) : undefined
+  const defaultCurrency = shopSettings[0]?.defaultCurrency
+
+  const prices = product.variants.flatMap(
+    (variant) => variant.prices.find((p) => p.currencyId === defaultCurrency?.id)?.price || 0,
+  )
+  const lowestPrice = Math.min(...prices)
+  const highestPrice = Math.max(...prices)
+
+  const formatPrice = (price: number) => `${defaultCurrency.symbol} ${price.toFixed(2)}`
+
+  const priceDisplay =
+    lowestPrice === highestPrice
+      ? formatPrice(lowestPrice)
+      : `${formatPrice(lowestPrice)} - ${formatPrice(highestPrice)}`
 
   const isNew = new Date().getTime() - new Date(product.createdAt).getTime() < 30 * 24 * 60 * 60 * 1000
 
   const image = product.imageUrls[0] || "/placeholder.svg"
 
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault() // Prevent navigation to product details page
+    const defaultVariant = product.variants[0]
+    addItem(product, defaultVariant, 1)
+    toast.success("Producto añadido al carrito", {
+      description: product.title,
+    })
+  }
+
   return (
     <motion.div
-      className="group relative bg-white rounded-2xl p-4 border   duration-300"
+      className="group relative bg-white rounded-2xl p-4 border hover:shadow-md transition-shadow duration-300"
       whileHover={{ y: -5 }}
       transition={{ duration: 0.2 }}
     >
-      <Link href={`/productos/${product.id}`}>
+      <Link href={`/productos/${product.slug}`}>
         {/* Badges */}
         <div className="absolute top-6 left-6 flex flex-col gap-2 z-10">
           {isNew && (
@@ -38,7 +63,6 @@ export function ProductCard({ product }: ProductCardProps) {
               NEW
             </Badge>
           )}
-          {discount && discount > 0 && <Badge className="bg-green-600 hover:bg-green-600/90">-{discount}%</Badge>}
         </div>
 
         {/* Image */}
@@ -56,20 +80,16 @@ export function ProductCard({ product }: ProductCardProps) {
         <div className="space-y-2">
           <p className="text-sm text-secondary">{product.title}</p>
           <div className="flex items-center gap-2">
-            <span className="text-lg font-bold text-gray-700">
-              {mainPrice.currency.symbol} {price.toFixed(2)}
-            </span>
-            {originalPrice && originalPrice > price && (
-              <span className="text-sm text-muted-foreground line-through">
-                {mainPrice.currency.symbol} {originalPrice.toFixed(2)}
-              </span>
-            )}
+            <span className="text-md font-bold text-gray-700">{priceDisplay}</span>
           </div>
         </div>
 
         {/* Add to Cart Button - Shows on hover */}
         <div className="absolute inset-x-4 bottom-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <Button className="w-full gap-2 bg-gradient-to-t from-primary to-primary/60 h-7 text-xs">
+          <Button
+            className="w-full gap-2 bg-gradient-to-t from-primary to-primary/60 h-7 text-xs"
+            onClick={handleAddToCart}
+          >
             <ShoppingCart className="w-4 h-4" />
             Añadir al Carrito
           </Button>

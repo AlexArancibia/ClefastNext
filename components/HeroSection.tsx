@@ -56,7 +56,7 @@ export function HeroSection() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlideIndex((prevIndex) => (prevIndex + 1) % slides.length)
-    }, 4000) // Cambiar slide cada 6 segundos
+    }, 6000) // Cambiar slide cada 6 segundos
 
     return () => clearInterval(interval)
   }, [])
@@ -177,14 +177,14 @@ export function HeroSection() {
       <div className=" ">
         <button
           onClick={prevSlide}
-          className="absolute z-[9999] text-accent left-4 top-1/2 transform -translate-y-1/2 bg-white/50 hover:bg-white/75 transition-colors rounded-full p-2"
+          className="absolute z-[150] text-accent left-4 top-1/2 transform -translate-y-1/2 bg-white/50 hover:bg-white/75 transition-colors rounded-full p-2"
           aria-label="Slide anterior"
         >
           <ChevronLeft className="w-6 h-6 text-secondary" />
         </button>
         <button
           onClick={nextSlide}
-          className="absolute z-[9999] text-accent  right-4 top-1/2 transform -translate-y-1/2 bg-white/50 hover:bg-white/75 transition-colors rounded-full p-2"
+          className="absolute z-[150] text-accent  right-4 top-1/2 transform -translate-y-1/2 bg-white/50 hover:bg-white/75 transition-colors rounded-full p-2"
           aria-label="Siguiente slide"
         >
           <ChevronRight className="w-6 h-6 text-secondary" />

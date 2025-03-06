@@ -1,13 +1,29 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import useEmblaCarousel from "embla-carousel-react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
  import { mockProducts } from "@/lib/mock-data"
 import { ProductCard } from "./ProductCard"
-
+import { useMainStore } from "@/stores/mainStore"
+import type {Product} from "@/types/product"
 export function ProductCarousel() {
+
+  const { products } = useMainStore();
+const [isLoading, setIsLoading] = useState(true);
+const [caruselProducts, setCaruselProducts] = useState<Product[]>([]);
+const hasFetched = useRef(false);
+
+
+  // Este efecto se ejecuta cuando `products` cambia
+  useEffect(() => {
+    if (products.length > 0) {
+      setCaruselProducts(products.slice(-10)); // Obtiene los últimos 10 productos
+    }
+  }, [products]);
+
+
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: "start",
     loop: false,
@@ -49,7 +65,7 @@ export function ProductCarousel() {
             {/* Carousel */}
             <div className="overflow-hidden pt-4" ref={emblaRef}>
               <div className="flex">
-                {mockProducts.slice(0, 6).map((product) => (
+                {products.slice(0, 6).map((product) => (
                   <div key={product.id} className="flex-[0_0_100%] min-w-0 sm:flex-[0_0_50%] lg:flex-[0_0_25%] px-3">
                     <ProductCard product={product} />
                   </div>

@@ -27,7 +27,7 @@ export function FilterDrawer({ onFilterChange }: FilterDrawerProps) {
           Filtros
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+      <SheetContent side="left" className="w-[350px] sm:w-[400px]">
         <SheetHeader>
           <SheetTitle>Filtros</SheetTitle>
         </SheetHeader>

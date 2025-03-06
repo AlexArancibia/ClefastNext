@@ -4,28 +4,96 @@ import { useState, useMemo } from "react"
 import { motion } from "framer-motion"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
  
-import { mockProducts } from "@/lib/mock-data"
+import type { Product } from "@/types/product"
+import type { Category } from "@/types/category"
+import { useMainStore } from "@/stores/mainStore"
 import { ProductFilters } from "./ProductsFilter"
 import { FilterDrawer } from "./FilterDrawer"
 import { ProductCard } from "@/components/ProductCard"
 import { Pagination } from "./Pagination"
 
 const PRODUCTS_PER_PAGE = 9
+interface ProductFiltersProps {
+  onFilterChange: (filters: Filters) => void
+  onResetFilters: () => void
+}
+interface Filters {
+  searchTerm: string
+  categories: string[]
+  variants: Record<string, string[]>
+  priceRange: [number, number]
+}
 
 export default function ProductList() {
+  const { products, shopSettings } = useMainStore()
   const [sortBy, setSortBy] = useState("featured")
-  const [filters, setFilters] = useState({})
+  const [filters, setFilters] = useState<Filters>({
+    searchTerm: "",
+    categories: [],
+    variants: {},
+    priceRange: [0, Number.POSITIVE_INFINITY],
+  })
   const [currentPage, setCurrentPage] = useState(1)
 
+  const defaultCurrency = shopSettings[0]?.defaultCurrency
+
   const filteredProducts = useMemo(() => {
-    // Aquí implementarías la lógica de filtrado real
-    return mockProducts
-  }, [])
+    return products.filter((product: Product) => {
+      // Filter by search term
+      if (filters.searchTerm && !product.title.toLowerCase().includes(filters.searchTerm.toLowerCase())) {
+        return false
+      }
+
+      // Filter by category
+      if (
+        filters.categories.length > 0 &&
+        !product.categories.some((cat: Category) => filters.categories.includes(cat.id))
+      ) {
+        return false
+      }
+
+      // Filter by variants
+      const variantMatches = Object.entries(filters.variants).every(([attribute, values]) => {
+        return product.variants.some(
+          (variant) =>
+            values.length === 0 ||
+            values.includes(variant.attributes[attribute as keyof typeof variant.attributes] as string),
+        )
+      })
+      if (!variantMatches) {
+        return false
+      }
+
+      // Filter by price
+      const productPrice = product.variants[0].prices.find((price) => price.currencyId === defaultCurrency?.id)?.price
+      if (productPrice && (productPrice < filters.priceRange[0] || productPrice > filters.priceRange[1])) {
+        return false
+      }
+
+      return true
+    })
+  }, [products, filters, defaultCurrency])
 
   const sortedProducts = useMemo(() => {
-    // Aquí implementarías la lógica de ordenamiento real
-    return [...filteredProducts]
-  }, [filteredProducts])
+    return [...filteredProducts].sort((a, b) => {
+      switch (sortBy) {
+        case "price-asc":
+          return (
+            (a.variants[0].prices.find((price) => price.currencyId === defaultCurrency?.id)?.price || 0) -
+            (b.variants[0].prices.find((price) => price.currencyId === defaultCurrency?.id)?.price || 0)
+          )
+        case "price-desc":
+          return (
+            (b.variants[0].prices.find((price) => price.currencyId === defaultCurrency?.id)?.price || 0) -
+            (a.variants[0].prices.find((price) => price.currencyId === defaultCurrency?.id)?.price || 0)
+          )
+        case "name":
+          return a.title.localeCompare(b.title)
+        default:
+          return 0
+      }
+    })
+  }, [filteredProducts, sortBy, defaultCurrency])
 
   const totalPages = Math.ceil(sortedProducts.length / PRODUCTS_PER_PAGE)
 
@@ -34,25 +102,15 @@ export default function ProductList() {
     return sortedProducts.slice(startIndex, startIndex + PRODUCTS_PER_PAGE)
   }, [sortedProducts, currentPage])
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  }
-
-  const handleFilterChange = (newFilters: any) => {
+  const handleFilterChange = (newFilters: Filters) => {
     setFilters(newFilters)
-    setCurrentPage(1) // Reset to first page when filters change
+    setCurrentPage(1)
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8">
+    <div className="flex flex-col lg:flex-row gap-16">
       {/* Sidebar con filtros (visible solo en desktop) */}
-      <aside className="hidden lg:block w-80 flex-shrink-0">
+      <aside className="hidden lg:block w-72 flex-shrink-0">
         <ProductFilters onFilterChange={handleFilterChange} />
       </aside>
 
@@ -78,18 +136,13 @@ export default function ProductList() {
         </div>
 
         {/* Grid de productos */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-        >
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {paginatedProducts.map((product) => (
-            <motion.div key={product.id} variants={containerVariants}>
+            <motion.div key={product.id} layout>
               <ProductCard product={product} />
             </motion.div>
           ))}
-        </motion.div>
+        </div>
 
         {/* Paginación */}
         <div className="mt-8">

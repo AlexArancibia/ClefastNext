@@ -8,7 +8,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const resolvedParams = use(params)
   return (
     <Suspense fallback={<ProductSkeleton />}>
-      <ProductDetails id={resolvedParams.id} />
+      <ProductDetails slug={resolvedParams.id} />
     </Suspense>
   )
 }

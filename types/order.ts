@@ -93,4 +93,86 @@ export interface RefundLineItem {
   createdAt: string
   updatedAt: string
 }
- 
+
+export interface CreateOrderItemDto {
+  productId: string
+  variantId?: string
+  title: string
+  quantity: number
+  price: number
+  totalDiscount?: number
+}
+
+export interface CreateOrderDto {
+  customerId?: string
+  email?: string
+  phone?: string
+  financialStatus?: OrderFinancialStatus
+  fulfillmentStatus?: OrderFulfillmentStatus
+  currencyId: string
+  totalPrice: number
+  subtotalPrice: number
+  totalTax: number
+  totalDiscounts: number
+  lineItems: CreateOrderItemDto[]
+  shippingAddressId?: string
+  billingAddressId?: string
+  couponId?: string
+  paymentProviderId?: string
+  paymentStatus?: string
+  paymentDetails?: Record<string, any>
+  shippingMethodId?: string
+  shippingStatus?: ShippingStatus
+  trackingNumber?: string
+  trackingUrl?: string
+  estimatedDeliveryDate?: string
+  shippedAt?: string
+  deliveredAt?: string
+  customerNotes?: string
+  internalNotes?: string
+  source?: string
+  preferredDeliveryDate?: string
+}
+
+export interface UpdateOrderDto {
+  customerId?: string
+  email?: string
+  phone?: string
+  financialStatus?: OrderFinancialStatus
+  fulfillmentStatus?: OrderFulfillmentStatus
+  totalPrice?: number
+  subtotalPrice?: number
+  totalTax?: number
+  totalDiscounts?: number
+  currencyId?: string
+  shippingAddressId?: string
+  billingAddressId?: string
+  couponId?: string
+  paymentProviderId?: string
+  paymentStatus?: string
+  paymentDetails?: Record<string, any>
+  shippingMethodId?: string
+  shippingStatus?: ShippingStatus
+  trackingNumber?: string
+  trackingUrl?: string
+  estimatedDeliveryDate?: string
+  shippedAt?: string
+  deliveredAt?: string
+  customerNotes?: string
+  internalNotes?: string
+  source?: string
+  preferredDeliveryDate?: string
+}
+
+export interface CreateRefundDto {
+  orderId: string
+  amount: number
+  note?: string
+  restock: boolean
+  lineItems: Array<{
+    orderItemId: string
+    quantity: number
+    amount: number
+    restocked: boolean
+  }>
+}

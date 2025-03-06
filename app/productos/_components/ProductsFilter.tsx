@@ -1,180 +1,202 @@
 "use client"
 
 import type React from "react"
-
-import { useState, useMemo } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { ChevronDown, ChevronUp } from "lucide-react"
+import { useState, useMemo, useEffect, useCallback } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import { mockCategories, mockProducts } from "@/lib/mock-data"
+import { Input } from "@/components/ui/input"
+import { Slider } from "@/components/ui/slider"
+import type { Category } from "@/types/category"
+import type { Product } from "@/types/product"
+import { useMainStore } from "@/stores/mainStore"
 
 interface ProductFiltersProps {
-  onFilterChange: (filters: any) => void
+  onFilterChange: (filters: Filters) => void
 }
 
-type ExpandedSections = {
-  [key: string]: boolean
+interface Filters {
+  searchTerm: string
+  categories: string[]
+  variants: Record<string, string[]>
+  priceRange: [number, number]
 }
 
 export function ProductFilters({ onFilterChange }: ProductFiltersProps) {
-  const [expandedSections, setExpandedSections] = useState<ExpandedSections>({
-    categories: true,
-    price: true,
-  })
+  const router = useRouter()
+  const { categories, products, shopSettings } = useMainStore()
+  const [searchTerm, setSearchTerm] = useState("")
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  const [selectedVariants, setSelectedVariants] = useState<Record<string, string[]>>({})
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000])
+  const [filtersChanged, setFiltersChanged] = useState(false)
 
-  const toggleSection = (section: string) => {
-    setExpandedSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }))
-  }
+  const defaultCurrency = shopSettings[0]?.defaultCurrency
 
-  const priceRanges = [
-    { label: "Menos de S/50", value: "0-50" },
-    { label: "S/50 - S/100", value: "50-100" },
-    { label: "S/100 - S/200", value: "100-200" },
-    { label: "Más de S/200", value: "200+" },
-  ]
+  const { minPrice, maxPrice } = useMemo(() => {
+    let min = Number.POSITIVE_INFINITY
+    let max = Number.NEGATIVE_INFINITY
+    products.forEach((product: Product) => {
+      product.variants.forEach((variant) => {
+        const price = variant.prices.find((p) => p.currencyId === defaultCurrency?.id)?.price || 0
+        min = Math.min(min, price)
+        max = Math.max(max, price)
+      })
+    })
+    return { minPrice: Math.floor(min), maxPrice: Math.ceil(max) }
+  }, [products, defaultCurrency])
+
+  useEffect(() => {
+    setPriceRange([minPrice, maxPrice])
+  }, [minPrice, maxPrice])
 
   const variantAttributes = useMemo(() => {
     const attributes: Record<string, Set<string>> = {}
-    mockProducts.forEach((product) => {
+    products.forEach((product: Product) => {
       product.variants.forEach((variant) => {
         Object.entries(variant.attributes).forEach(([key, value]) => {
-          if (!attributes[key]) {
-            attributes[key] = new Set()
+          if (key !== "type" && typeof value === "string") {
+            if (!attributes[key]) {
+              attributes[key] = new Set()
+            }
+            attributes[key].add(value)
           }
-          attributes[key].add(value)
         })
       })
     })
     return Object.fromEntries(Object.entries(attributes).map(([key, value]) => [key, Array.from(value).sort()]))
-  }, [])
+  }, [products])
+
+  const applyFilters = useCallback(() => {
+    if (filtersChanged) {
+      const filters: Filters = {
+        searchTerm,
+        categories: selectedCategories,
+        variants: selectedVariants,
+        priceRange,
+      }
+      onFilterChange(filters)
+      setFiltersChanged(false)
+    }
+  }, [searchTerm, selectedCategories, selectedVariants, priceRange, onFilterChange, filtersChanged])
+
+  useEffect(() => {
+    applyFilters()
+  }, [applyFilters])
+
+  const handleCategoryChange = (categoryId: string) => {
+    setSelectedCategories((prev) =>
+      prev.includes(categoryId) ? prev.filter((id) => id !== categoryId) : [...prev, categoryId],
+    )
+    setFiltersChanged(true)
+  }
+
+  const handleVariantChange = (attribute: string, value: string) => {
+    setSelectedVariants((prev) => {
+      const currentValues = prev[attribute] || []
+      return {
+        ...prev,
+        [attribute]: currentValues.includes(value)
+          ? currentValues.filter((v) => v !== value)
+          : [...currentValues, value],
+      }
+    })
+    setFiltersChanged(true)
+  }
+
+  const handlePriceChange = (value: number[]) => {
+    setPriceRange([value[0], value[1]])
+    setFiltersChanged(true)
+  }
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value)
+    setFiltersChanged(true)
+  }
+
+  const resetFilters = () => {
+    setSearchTerm("")
+    setSelectedCategories([])
+    setSelectedVariants({})
+    setPriceRange([minPrice, maxPrice])
+    setFiltersChanged(true)
+    router.refresh()
+  }
 
   return (
-    <div className="w-80 bg-white p-6 rounded-lg border border-border space-y-6 sticky">
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">Filtros</h2>
+    <div className="w-72 bg-white space-y-6 ">
 
-      <FilterSection
-        title="Categorías"
-        isExpanded={expandedSections["categories"]}
-        onToggle={() => toggleSection("categories")}
-      >
-        <div className="space-y-3">
-          {mockCategories.map((category) => (
-            <div key={category.id} className="space-y-2">
-              <div className="flex items-center space-x-2">
-                <Checkbox id={category.id} className="rounded-sm" />
-                <label
-                  htmlFor={category.id}
-                  className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
-                >
-                  {category.name} <span className="text-gray-400">({category.products.length})</span>
-                </label>
-              </div>
-              {category.children && category.children.length > 0 && (
-                <div className="ml-6 space-y-1">
-                  {category.children.map((subCategory) => (
-                    <div key={subCategory.id} className="flex items-center space-x-2">
-                      <Checkbox id={subCategory.id} className="rounded-sm" />
-                      <label
-                        htmlFor={subCategory.id}
-                        className="text-sm text-gray-600 hover:text-gray-800 transition-colors"
-                      >
-                        {subCategory.name} <span className="text-gray-400">({subCategory.products.length})</span>
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </FilterSection>
+      {/* Search */}
+      <Input
+        type="text"
+        placeholder="Buscar productos"
+        value={searchTerm}
+        onChange={handleSearchChange}
+        className="w-full"
+      />
 
-      <FilterSection title="Precio" isExpanded={expandedSections["price"]} onToggle={() => toggleSection("price")}>
-        <div className="space-y-2">
-          {priceRanges.map((range) => (
-            <div key={range.value} className="flex items-center space-x-2">
-              <Checkbox id={range.value} className="rounded-sm" />
-              <label htmlFor={range.value} className="text-sm text-gray-700 hover:text-gray-900 transition-colors">
-                {range.label}
+      {/* Categories */}
+      <div>
+        <h3 className="text-lg font-medium mb-4">Categorías</h3>
+        <div className="space-y-2 max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300">
+          {categories.map((category: Category) => (
+            <div key={category.id} className="flex items-center space-x-2">
+              <Checkbox
+                id={category.id}
+                checked={selectedCategories.includes(category.id)}
+                onCheckedChange={() => handleCategoryChange(category.id)}
+              />
+              <label htmlFor={category.id} className="text-sm text-gray-700 cursor-pointer">
+                {category.name}
               </label>
             </div>
           ))}
         </div>
-      </FilterSection>
+      </div>
 
+      {/* Price Range */}
+      <div>
+        <h3 className="text-lg font-medium mb-4">Precio</h3>
+        <div className="space-y-4">
+          <Slider
+            min={minPrice}
+            max={maxPrice}
+            step={1}
+            value={priceRange}
+            onValueChange={handlePriceChange}
+            className="w-full"
+          />
+          <div className="flex justify-between text-sm text-gray-600">
+            <span>{defaultCurrency?.symbol}{priceRange[0]}</span>
+            <span>{defaultCurrency?.symbol}{priceRange[1]}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Variant Attributes */}
       {Object.entries(variantAttributes).map(([attribute, values]) => (
-        <FilterSection
-          key={attribute}
-          title={attribute.charAt(0).toUpperCase() + attribute.slice(1)}
-          isExpanded={expandedSections[attribute] || false}
-          onToggle={() => toggleSection(attribute)}
-        >
-          <div className="grid grid-cols-2 gap-2">
+        <div key={attribute}>
+          <h3 className="text-lg font-medium mb-4  ">{attribute}</h3>
+          <div className="space-y-2 max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300">
             {values.map((value) => (
               <div key={`${attribute}-${value}`} className="flex items-center space-x-2">
-                <Checkbox id={`${attribute}-${value}`} className="rounded-sm" />
-                <label
-                  htmlFor={`${attribute}-${value}`}
-                  className="text-sm text-gray-700 hover:text-gray-900 transition-colors"
-                >
+                <Checkbox
+                  id={`${attribute}-${value}`}
+                  checked={(selectedVariants[attribute] || []).includes(value)}
+                  onCheckedChange={() => handleVariantChange(attribute, value)}
+                />
+                <label htmlFor={`${attribute}-${value}`} className="text-sm text-gray-700 cursor-pointer">
                   {value}
                 </label>
               </div>
             ))}
           </div>
-        </FilterSection>
+        </div>
       ))}
 
-      <Button className="w-full mt-6 bg-primary hover:bg-primary/90 text-white" onClick={() => onFilterChange({})}>
-        Aplicar Filtros
+      <Button onClick={resetFilters} className="w-full bg-secondary text-white hover:bg-blue-700 transition">
+        Resetear Filtros
       </Button>
     </div>
   )
 }
-
-interface FilterSectionProps {
-  title: string
-  isExpanded: boolean
-  onToggle: () => void
-  children: React.ReactNode
-}
-
-function FilterSection({ title, isExpanded, onToggle, children }: FilterSectionProps) {
-  return (
-    <div className="border-b border-gray-200 pb-4 last:border-b-0 last:pb-0">
-      <button
-        onClick={onToggle}
-        className="flex items-center justify-between w-full py-2 text-left focus:outline-none group"
-      >
-        <h3 className="text-lg font-semibold text-gray-900 group-hover:text-primary transition-colors">{title}</h3>
-        {isExpanded ? (
-          <ChevronUp className="w-5 h-5 text-gray-500 group-hover:text-primary transition-colors" />
-        ) : (
-          <ChevronDown className="w-5 h-5 text-gray-500 group-hover:text-primary transition-colors" />
-        )}
-      </button>
-      <AnimatePresence initial={false}>
-        {isExpanded && (
-          <motion.div
-            initial="collapsed"
-            animate="open"
-            exit="collapsed"
-            variants={{
-              open: { opacity: 1, height: "auto" },
-              collapsed: { opacity: 0, height: 0 },
-            }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="mt-2 space-y-2 overflow-hidden"
-          >
-            {children}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  )
-}
-

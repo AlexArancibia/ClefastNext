@@ -22,3 +22,31 @@ export interface Address extends Timestamps {
 }
  
 
+export interface CreateAddressDto {
+
+  isDefault?: boolean
+  company?: string
+  address1: string
+  address2?: string
+  city: string
+  province?: string
+  zip: string
+  country: string
+  phone?: string
+}
+
+export interface UpdateAddressDto {
+  id?: string
+  firstName?: string
+  lastName?: string
+  isDefault?: boolean
+  company?: string
+  address1?: string
+  address2?: string
+  city?: string
+  province?: string
+  zip?: string
+  country?: string
+  phone?: string
+}
+
