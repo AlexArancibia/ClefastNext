@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import useEmblaCarousel from "embla-carousel-react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
- import { mockProducts } from "@/lib/mock-data"
+ 
 import { ProductCard } from "./ProductCard"
 import { useMainStore } from "@/stores/mainStore"
 import type {Product} from "@/types/product"
