@@ -32,7 +32,7 @@ export function Testimonials() {
   }, [emblaApi])
 
   return (
-    <section className="py-16 bg-muted/30">
+    <section className="py-20 bg-muted/30">
       <div className="container-section">
         <div className="content-section">
           <motion.h2
@@ -59,7 +59,7 @@ export function Testimonials() {
                     <div>
                       <div className="flex items-center gap-4 mb-4">
                         <Image
-                          src={testimonial.avatar || "/placeholder.svg"}
+                          src={testimonial.avatar || "/avatar.svg"}
                           alt={testimonial.name}
                           width={48}
                           height={48}

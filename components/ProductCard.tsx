@@ -29,7 +29,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const lowestPrice = Math.min(...prices)
   const highestPrice = Math.max(...prices)
 
-  const formatPrice = (price: number) => `${defaultCurrency.symbol} ${price.toFixed(2)}`
+  const formatPrice = (price: number) => `${defaultCurrency?.symbol} ${price.toFixed(2)}`
 
   const priceDisplay =
     lowestPrice === highestPrice

@@ -1,32 +1,65 @@
+"use client"
 
-import { blogPosts } from "@/lib/data"
-import { FeaturedPost } from "./_components/FeaturedPost"
+import { useEffect } from "react"
+import { useMainStore } from "@/stores/mainStore"
+ 
+import { Skeleton } from "@/components/ui/skeleton"
+ 
 import { PostCard } from "./_components/PostCard"
-import { Testimonials } from "./_components/Testimonials"
+ 
+import { FeaturedContent } from "./_components/FeaturedPost"
 
 export default function BlogPage() {
-  const featuredPost = blogPosts.find((post) => post.featured)
-  const regularPosts = blogPosts.filter((post) => !post.featured)
+  const { contents, fetchContents, loading } = useMainStore()
+
+  useEffect(() => {
+    fetchContents()
+  }, [fetchContents])
+
+  const featuredPost = contents[0]
+
+  if (loading) {
+    return <BlogSkeleton />
+  }
 
   return (
-    <main className="min-h-screen ">
+    <main className="  bg-gray-50  ">
       <div className="container-section py-8">
         <div className="content-section">
           {/* Featured Post */}
-          {featuredPost && <FeaturedPost post={featuredPost} />}
+          {featuredPost && <FeaturedContent content={featuredPost} />}
 
           {/* Regular Posts Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-16 pb-12">
-            {regularPosts.map((post, index) => (
-              <PostCard key={post.id} post={post} index={index} />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-16">
+            {contents.map((content, index) => (
+              <PostCard key={content.id} content={content} index={index} />
             ))}
           </div>
         </div>
       </div>
 
       {/* Testimonials Section */}
-      <Testimonials />
+ 
     </main>
+  )
+}
+
+function BlogSkeleton() {
+  return (
+    <div className="container-section py-8">
+      <div className="content-section">
+        <Skeleton className="w-full h-[400px] mb-16" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="space-y-4">
+              <Skeleton className="w-full h-[200px]" />
+              <Skeleton className="w-3/4 h-6" />
+              <Skeleton className="w-1/2 h-4" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   )
 }
 

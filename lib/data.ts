@@ -94,7 +94,7 @@ export const testimonials = [
     id: 1,
     name: "Carlos Rodríguez",
     role: "Gerente de Operaciones, Lavandería Industrial",
-    avatar: "/placeholder.svg",
+    avatar: "/avatar.svg",
     rating: 5,
     text:
       "Los productos de limpieza de Clefast han revolucionado nuestras operaciones. La eficiencia y calidad son incomparables.",
@@ -103,7 +103,7 @@ export const testimonials = [
     id: 2,
     name: "María Gómez",
     role: "Directora de Housekeeping, Hotel 5 Estrellas",
-    avatar: "/placeholder.svg",
+    avatar: "/avatar.svg",
     rating: 5,
     text:
       "Desde que empezamos a usar los productos de Clefast, nuestros huéspedes no paran de elogiar la limpieza de las habitaciones.",
@@ -112,7 +112,7 @@ export const testimonials = [
     id: 3,
     name: "Jorge Mendoza",
     role: "Supervisor de Mantenimiento, Planta Industrial",
-    avatar: "/placeholder.svg",
+    avatar: "/avatar.svg",
     rating: 5,
     text:
       "La línea de desengrasantes industriales de Clefast es simplemente la mejor. Ha mejorado significativamente nuestra eficiencia.",
@@ -121,7 +121,7 @@ export const testimonials = [
     id: 4,
     name: "Ana Martínez",
     role: "Propietaria, Servicio de Limpieza",
-    avatar: "/placeholder.svg",
+    avatar: "/avatar.svg",
     rating: 5,
     text:
       "Como empresa de servicios de limpieza, la calidad de los productos es crucial. Clefast siempre cumple y supera nuestras expectativas.",
