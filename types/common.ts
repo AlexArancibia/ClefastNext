@@ -46,14 +46,6 @@ export enum DiscountType {
   FREE_SHIPPING = 'FREE_SHIPPING'
 }
 
-export enum FulfillmentStatus {
-  PENDING = 'PENDING',
-  OPEN = 'OPEN',
-  SUCCESS = 'SUCCESS',
-  CANCELLED = 'CANCELLED',
-  ERROR = 'ERROR',
-  FAILURE = 'FAILURE'
-}
 
 export enum PaymentProviderType {
   CREDIT_CARD = 'CREDIT_CARD',

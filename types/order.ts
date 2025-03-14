@@ -55,8 +55,6 @@ export interface OrderItem {
   id: string
   order: Order
   orderId: string
-  product: Product
-  productId: string
   variant?: ProductVariant
   variantId?: string
   title: string
@@ -95,7 +93,6 @@ export interface RefundLineItem {
 }
 
 export interface CreateOrderItemDto {
-  productId: string
   variantId?: string
   title: string
   quantity: number

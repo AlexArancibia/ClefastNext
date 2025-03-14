@@ -120,8 +120,8 @@ interface MainStore {
   getCouponById: (id: string) => Coupon | undefined
   getCurrencyById: (id: string) => Currency | undefined
   getExchangeRateById: (id: string) => ExchangeRate | undefined
-
-
+  submitFormEmail: (formData: any) => Promise<void>
+  sendEmail: (to: string, subject: string, html: string) => Promise<void>
   initializeStore: () => Promise<void>;
 
 }
@@ -660,6 +660,29 @@ export const useMainStore = create<MainStore>((set, get) => ({
 
   getExchangeRateById: (id) => {
     return get().exchangeRates.find((exchangeRate) => exchangeRate.id === id)
+  },
+
+  sendEmail: async (to, subject, html) => {
+    try {
+      const response = await apiClient.post("/email/send", {
+        to,
+        subject,
+        html,
+      })
+      return response.data
+    } catch (error) {
+      console.error("Error sending email:", error)
+      throw error
+    }
+  },
+  submitFormEmail: async (formData) => {
+    try {
+      const response = await apiClient.post("/email/submit-form", formData)
+      return response.data
+    } catch (error) {
+      console.error("Error submitting form email:", error)
+      throw error
+    }
   },
 
   initializeStore: async () => {

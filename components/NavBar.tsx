@@ -3,14 +3,17 @@
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { Menu, Search, ShoppingCart, User, X } from "lucide-react"
+import { Menu, ShoppingCart, User, X } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Input } from "@/components/ui/input"
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useCartStore } from "@/stores/cartStore"
 import { useMainStore } from "@/stores/mainStore"
+import { useAuthStore } from "@/stores/authStore"
+import { UserDropdown } from "@/components/auth/user-dropdown"
+import { AuthModal } from "@/components/auth/auth-modal"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const navItems = [
   { name: "Inicio", href: "/" },
@@ -23,10 +26,24 @@ const navItems = [
 
 export function Navbar() {
   const pathname = usePathname()
-  const [isSearchVisible, setIsSearchVisible] = useState(false)
   const { items, removeItem } = useCartStore()
   const { shopSettings } = useMainStore()
   const defaultCurrency = shopSettings[0]?.defaultCurrency
+  const { isAuthenticated, checkAuth } = useAuthStore()
+
+  const [authChecking, setAuthChecking] = useState(true)
+
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      await checkAuth()
+      setAuthChecking(false)
+    }
+
+    // Check if we have a token in localStorage first
+    const hasToken = typeof window !== "undefined" && localStorage.getItem("auth-storage") !== null
+
+    checkAuthStatus()
+  }, [checkAuth])
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
   const totalPrice = items.reduce((sum, item) => {
@@ -90,9 +107,9 @@ export function Navbar() {
                 </SheetTrigger>
                 <SheetContent side="right" className="w-[350px] sm:w-[400px] bg-background">
                   <SheetHeader>
-                    <SheetTitle ></SheetTitle>
+                    <SheetTitle>Tu Carrito</SheetTitle>
                   </SheetHeader>
-                  <div className="  flex flex-col h-full">
+                  <div className="flex flex-col h-[97%]">
                     <div className="flex-grow overflow-y-auto">
                       {items.length === 0 ? (
                         <p className="text-center text-muted-foreground">Tu carrito está vacío</p>
@@ -110,7 +127,9 @@ export function Navbar() {
                               <h4 className="font-medium text-base">{item.product.title}</h4>
                               <p className="text-sm text-muted-foreground">
                                 Cantidad: {item.quantity} x {defaultCurrency?.symbol}
-                                {Number(item.variant.prices.find((p) => p.currencyId === defaultCurrency?.id)?.price).toFixed(2)}
+                                {Number(
+                                  item.variant.prices.find((p) => p.currencyId === defaultCurrency?.id)?.price,
+                                ).toFixed(2)}
                               </p>
                             </div>
                             <Button
@@ -132,12 +151,16 @@ export function Navbar() {
                           {totalPrice.toFixed(2)}
                         </p>
                         <div className="flex gap-2">
-                          <Button asChild className="flex-1" variant="outline">
-                            <Link href="/cart">Ver Carrito</Link>
-                          </Button>
-                          <Button asChild className="flex-1">
-                            <Link href="/checkout">Proceder a Pagar</Link>
-                          </Button>
+                        <SheetClose asChild>
+                            <Button asChild className="flex-1" variant="outline">
+                              <Link href="/cart">Ver Carrito</Link>
+                            </Button>
+                          </SheetClose>
+                          <SheetClose asChild>
+                            <Button asChild className="flex-1">
+                              <Link href="/checkout">Proceder a Pagar</Link>
+                            </Button>
+                          </SheetClose>
                         </div>
                       </div>
                     )}
@@ -146,14 +169,24 @@ export function Navbar() {
               </Sheet>
 
               {/* User Icon - Desktop */}
-              <Button
-                variant="ghost"
-                className="hidden sm:flex bg-primary text-white hover:text-primary font-normal text-[13px] hover:bg-secondary/10 px-3"
-                aria-label="Perfil de usuario"
-              >
-                <User className="h-5 w-5" aria-hidden="true" />
-                Iniciar Sesión
-              </Button>
+              {authChecking ? (
+                <Skeleton className="h-9 w-32 rounded-md" /> // Skeleton for loading state
+              ) : isAuthenticated ? (
+                <UserDropdown />
+              ) : (
+                <AuthModal
+                  trigger={
+                    <Button
+                      variant="ghost"
+                      className="hidden sm:flex bg-primary text-white hover:text-primary font-normal text-[13px] hover:bg-secondary/10 px-3"
+                      aria-label="Iniciar sesión"
+                    >
+                      <User className="h-5 w-5 mr-2" aria-hidden="true" />
+                      Iniciar Sesión
+                    </Button>
+                  }
+                />
+              )}
 
               {/* Mobile Menu */}
               <Sheet>
@@ -185,34 +218,11 @@ export function Navbar() {
                         </Link>
                       </SheetClose>
                     ))}
-                    <div className="pt-4">
-                      <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-                        Iniciar Sesión
-                      </Button>
-                    </div>
                   </nav>
                 </SheetContent>
               </Sheet>
             </div>
           </div>
-
-          {/* Mobile Search - Expandable */}
-          {isSearchVisible && (
-            <div className="lg:hidden mt-3">
-              <div className="relative">
-                <Input
-                  type="search"
-                  placeholder="Buscar Productos"
-                  className="pl-10 w-full bg-gray-100 border-border focus-visible:ring-primary"
-                  aria-label="Buscar productos"
-                />
-                <Search
-                  className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-secondary"
-                  aria-hidden="true"
-                />
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </nav>

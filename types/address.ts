@@ -5,7 +5,7 @@ import { Order } from './order';
 export interface Address extends Timestamps {
   id: string
 
-  isDefault: boolean | null
+  isDefault: boolean
   company: string | null
   address1: string
   address2: string | null
@@ -19,7 +19,7 @@ export interface Address extends Timestamps {
   customer: Customer
   customerId: string
 
-}
+} 
  
 
 export interface CreateAddressDto {

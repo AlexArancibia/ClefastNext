@@ -10,10 +10,11 @@ export function Toaster() {
     <SonnerToaster
       theme={theme as "light" | "dark" | "system"}
       className="toaster group"
-      position="top-center"
-      expand
+      position="bottom-right"
+      expand={false}
       richColors
       toastOptions={{
+        duration: 4000,
         classNames: {
           toast:
             "group toast group-[.toaster]:bg-white group-[.toaster]:text-gray-950 group-[.toaster]:border-gray-200 group-[.toaster]:shadow-lg dark:group-[.toaster]:bg-gray-950 dark:group-[.toaster]:text-gray-200 dark:group-[.toaster]:border-gray-800",

@@ -14,13 +14,14 @@ export interface Customer extends Timestamps {
 }
 
 export interface CreateCustomerDto {
-  email: string;
+  email?: string;
   firstName?: string;
   lastName?: string;
   phone?: string;
-  password: string;
+  password?: string;
   acceptsMarketing?: boolean;
   addresses?: CreateAddressDto[];
+    
 }
 
 export interface UpdateCustomerDto {
