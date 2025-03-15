@@ -1,6 +1,7 @@
 
 import { AboutSection } from "@/components/About";
 import { BlogSection } from "@/components/BlogSection";
+import { Catalogo } from "@/components/Catalog";
 import { DeliverySection } from "@/components/DeliverySection";
 import { FeaturesSection } from "@/components/FeaturesSection";
 import { HeroSection } from "@/components/HeroSection";
@@ -16,6 +17,8 @@ export default function Home() {
       <FeaturesSection />
       <ProductCarousel />
       <DeliverySection />
+ 
+
       <BlogSection />
     </>
   );

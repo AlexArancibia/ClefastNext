@@ -17,7 +17,14 @@ export function WhatsAppButton() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <Image src="/wsp.png" alt="Logo Whatsapp" width={40} height={40}  />
+      <Image
+  src="/wsp.png"
+  alt="Logo Whatsapp"
+  width={40}
+  height={40}
+  className="w-7 h-7 sm:w-10 sm:h-10 md:w-12 md:h-12"
+/>
+
       
       <span className="sr-only">Contáctanos por WhatsApp</span>
       <motion.div

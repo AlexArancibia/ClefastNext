@@ -7,6 +7,7 @@ import type { Product } from "@/types/product"
 import { useMainStore } from "@/stores/mainStore"
 import { useMemo } from "react"
 import { Button } from "@/components/ui/button"
+import { WashingTestButton } from "./WashingTestButton"
 
 interface ProductSidebarProps {
   product: Product
@@ -34,17 +35,7 @@ export function ProductSidebar({ product }: ProductSidebarProps) {
     <div className="space-y-6">
       {/* Destacados */}
       <div className="space-y-3">
-        <div className="border-2 border-blue-100 rounded-2xl p-4 bg-blue-50">
-          <div className="flex items-center gap-3">
-            <div className="bg-white p-2 rounded-lg">
-              <FlaskConical className="w-6 h-6 text-blue-600" />
-            </div>
-            <div>
-              <p className="font-bold text-gray-900">PRUEBAS DE LAVADO</p>
-              <p className="text-blue-600 font-medium">GRATIS</p>
-            </div>
-          </div>
-        </div>
+      <WashingTestButton />
         <div className="border-2 border-blue-100 rounded-2xl p-4 bg-blue-50">
           <div className="flex items-center gap-3">
             <div className="bg-white p-2 rounded-lg">

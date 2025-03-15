@@ -51,7 +51,7 @@ const hasFetched = useRef(false);
       <div className="container-section">
         <div className="content-section">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-4  md:mb-8">
-            <h2 className="text-3xl lg:text-4xl font-bold text-secondary">NUESTROS PRODUCTOS</h2>
+            <h2 className=" ">NUESTROS PRODUCTOS</h2>
             <a
               href="/productos"
               className="text-primary hover:text-primary/90 transition-colors flex items-center gap-2"

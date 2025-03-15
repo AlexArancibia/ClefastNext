@@ -14,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { toast } from "sonner"
 import { MapPin, Phone, Mail, Clock } from "lucide-react"
 import { CONTACT_INFO } from "@/lib/constants"
+import { useMainStore } from "@/stores/mainStore"
 
 const formSchema = z.object({
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
@@ -50,41 +51,63 @@ const itemVariants = {
 
 export function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { submitFormEmail } = useMainStore()
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      subject: "",
+      acceptTerms: false,
+    },
   })
 
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true)
-    // Simular envío de formulario
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-    console.log(data)
-    toast.success("Formulario enviado", {
-      description: "Gracias por contactarnos. Te responderemos pronto.",
-    })
-    reset()
-    setIsSubmitting(false)
+
+    try {
+      // Usar la función del store para enviar el formulario
+      await submitFormEmail({
+        ...data,
+        type: "contact-form",
+      })
+
+      toast.success("Formulario enviado", {
+        description: "Gracias por contactarnos. Te responderemos pronto.",
+      })
+      reset()
+    } catch (error) {
+      console.error("Error al enviar el formulario:", error)
+      toast.error("Error al enviar el formulario", {
+        description: "Por favor, inténtalo de nuevo más tarde.",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Manejar el cambio de valor en el Select
+  const handleSubjectChange = (value: string) => {
+    setValue("subject", value, { shouldValidate: true })
   }
 
   return (
-    <section className="py-16  bg-[url('/gradient1.png')] bg-cover bg-center">
+    <section className="py-16 bg-[url('/gradient1.png')] bg-cover bg-center">
       <div className="container-section">
-
         <div className="content-section text-center pb-12">
-                    <motion.h2 variants={itemVariants} className="  text-gray-900 mb-4">
-                      Contáctanos
-                    </motion.h2>
-                    <motion.p variants={itemVariants} className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
-                      Estamos aquí para responder a tus preguntas y ayudarte con tus necesidades de limpieza industrial. No
-                      dudes en ponerte en contacto con nosotros para obtener más información sobre nuestros productos y
-                      servicios.
-                    </motion.p>
-                  </div>
+          <motion.h2 variants={itemVariants} className="text-gray-900 mb-4">
+            Contáctanos
+          </motion.h2>
+          <motion.p variants={itemVariants} className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
+            Estamos aquí para responder a tus preguntas y ayudarte con tus necesidades de limpieza industrial. No dudes
+            en ponerte en contacto con nosotros para obtener más información sobre nuestros productos y servicios.
+          </motion.p>
+        </div>
 
         <div className="content-section">
           <motion.div
@@ -123,7 +146,6 @@ export function ContactForm() {
                     <Clock className="w-6 h-6 mr-3 flex-shrink-0" />
                     <div>
                       <p>Lunes - Viernes: 9:00 AM - 6:00 PM</p>
- 
                     </div>
                   </motion.div>
                 </motion.div>
@@ -136,7 +158,7 @@ export function ContactForm() {
                 </motion.h2>
                 <motion.form variants={containerVariants} onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                   {/* Nombre y Email en dos columnas */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <motion.div variants={itemVariants}>
                       <Label htmlFor="name">Nombre completo</Label>
                       <Input id="name" {...register("name")} />
@@ -150,7 +172,7 @@ export function ContactForm() {
                   </div>
 
                   {/* Teléfono y Empresa en dos columnas */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <motion.div variants={itemVariants}>
                       <Label htmlFor="phone">Teléfono</Label>
                       <Input id="phone" {...register("phone")} />
@@ -165,8 +187,8 @@ export function ContactForm() {
                   {/* Asunto */}
                   <motion.div variants={itemVariants}>
                     <Label htmlFor="subject">Asunto</Label>
-                    <Select onValueChange={(value) => register("subject").onChange({ target: { value } })}>
-                      <SelectTrigger>
+                    <Select onValueChange={handleSubjectChange}>
+                      <SelectTrigger id="subject">
                         <SelectValue placeholder="Selecciona un asunto" />
                       </SelectTrigger>
                       <SelectContent>
@@ -187,9 +209,12 @@ export function ContactForm() {
                   </motion.div>
 
                   {/* Términos y condiciones */}
-                  <motion.div variants={itemVariants} className="flex items-center space-x-2">
-                    <Checkbox id="acceptTerms" {...register("acceptTerms")} />
-                    <Label htmlFor="acceptTerms">Acepto los términos y condiciones</Label>
+                  <motion.div variants={itemVariants} className="flex items-start space-x-2">
+                    <Checkbox id="acceptTerms" {...register("acceptTerms")} className="mt-1" />
+                    <Label htmlFor="acceptTerms" className="text-sm leading-tight">
+                      Acepto los términos y condiciones y la política de privacidad. Entiendo que mi información será
+                      procesada de acuerdo con la política de privacidad.
+                    </Label>
                   </motion.div>
                   {errors.acceptTerms && <p className="text-sm text-red-500 mt-1">{errors.acceptTerms.message}</p>}
 
