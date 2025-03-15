@@ -121,7 +121,7 @@ export function Catalogo() {
           {previewItem && (
             <>
               <DialogTitle>{previewItem.title}</DialogTitle>
-              <DialogDescription>{previewItem.description}</DialogDescription>
+              {/* <DialogDescription>{previewItem.description}</DialogDescription> */}
 
               <div className="mt-4 aspect-[3/4]   relative rounded-lg overflow-hidden">
                 <Image
