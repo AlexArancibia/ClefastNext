@@ -114,7 +114,7 @@ export default function ProductDetails({ slug }: ProductDetailsProps) {
   }
 
   const mainPrice = selectedVariant.prices[0]
-  const price = mainPrice.price
+  const price = mainPrice?.price || 0
 
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     const { left, top, width, height } = event.currentTarget.getBoundingClientRect()
@@ -341,7 +341,7 @@ export default function ProductDetails({ slug }: ProductDetailsProps) {
                 <div className="flex gap-4">
                   <div className="flex items-center gap-2">
                     <span className="text-2xl font-bold text-primary">
-                      {mainPrice.currency.symbol}
+                      {mainPrice?.currency.symbol }
                       {Number(price).toFixed(2)}
                     </span>
                   </div>

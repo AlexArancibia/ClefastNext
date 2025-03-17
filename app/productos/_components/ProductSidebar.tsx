@@ -111,7 +111,7 @@ export function ProductSidebar({ product }: ProductSidebarProps) {
                 </p>
                 <p className="text-sm text-primary font-medium">
                   {defaultCurrency?.symbol}
-                  {Number(latestProduct.variants[0].prices[0].price).toFixed(2)}
+                  {Number(latestProduct.variants[0].prices[0]?.price).toFixed(2)}
                 </p>
               </div>
             </Link>

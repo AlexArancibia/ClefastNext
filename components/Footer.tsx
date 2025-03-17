@@ -153,21 +153,21 @@ export function Footer() {
 
             {/* Industries */}
             <motion.div variants={itemVariants}>
-              <h3 className="text-lg font-semibold mb-4">Industrias</h3>
+              <h3 className="text-lg font-semibold mb-4">Información</h3>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <Link href="/industries/laundry" className="text-gray-400 hover:text-white">
-                    Lavanderías
+                  <Link href="/privacidad" className="text-gray-400 hover:text-white">
+                    Política de Privacidad
                   </Link>
                 </li>
                 <li>
-                  <Link href="/industries/hotels" className="text-gray-400 hover:text-white">
-                    Hoteles
+                  <Link href="/terminos-de-uso" className="text-gray-400 hover:text-white">
+                    Términos de Uso
                   </Link>
                 </li>
                 <li>
-                  <Link href="/industries/mining" className="text-gray-400 hover:text-white">
-                    Minas
+                  <Link href="/reclamaciones" className="text-gray-400 hover:text-white">
+                    Libro de Reclamaciónes
                   </Link>
                 </li>
               </ul>
@@ -213,7 +213,7 @@ export function Footer() {
             variants={itemVariants}
           >
             <p className="text-gray-400 text-xs">COPYRIGHT © {new Date().getFullYear()} CLEFAST | DESIGN BY CREADILATAM</p>
-            <div className="flex flex-col md:flex-row items-center gap-4 mt-4 md:mt-0 text-xs">
+            {/* <div className="flex flex-col md:flex-row items-center gap-4 mt-4 md:mt-0 text-xs">
               <Link href="/terminos" className="text-gray-400 hover:text-white">
                 TÉRMINOS DE USO
               </Link>
@@ -224,7 +224,7 @@ export function Footer() {
               <Link href="/reclamaciones" className="text-gray-400 hover:text-white">
                 LIBRO DE RECLAMACIONES
               </Link>
-            </div>
+            </div> */}
           </motion.div>
         </div>
       </motion.footer>
