@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import { motion, AnimatePresence, type PanInfo } from "framer-motion"
 import type { HeroSection } from "@/types/heroSection"
 import { Button } from "@/components/ui/button"
@@ -12,6 +12,17 @@ interface HeroCarouselProps {
 }
 
 export function HeroCarousel({ heroSections }: HeroCarouselProps) {
+  // Filtrar solo las secciones de héroe con metadata.section igual a "promociones"
+  const filteredHeroSections = useMemo(() => {
+    return heroSections.filter(
+      (section) =>
+        section.metadata &&
+        typeof section.metadata === "object" &&
+        "section" in section.metadata &&
+        section.metadata.section === "promociones",
+    )
+  }, [heroSections])
+
   const [currentIndex, setCurrentIndex] = useState(0)
   const [direction, setDirection] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
@@ -48,10 +59,10 @@ export function HeroCarousel({ heroSections }: HeroCarouselProps) {
 
   // Función para avanzar al siguiente slide
   const nextSlide = () => {
-    if (isTransitioning) return
+    if (isTransitioning || filteredHeroSections.length <= 1) return
     setIsTransitioning(true)
     setDirection(1)
-    setCurrentIndex((prevIndex) => (prevIndex === heroSections.length - 1 ? 0 : prevIndex + 1))
+    setCurrentIndex((prevIndex) => (prevIndex === filteredHeroSections.length - 1 ? 0 : prevIndex + 1))
     resetProgress()
 
     // Desactivar el estado de transición después de que termine
@@ -62,10 +73,10 @@ export function HeroCarousel({ heroSections }: HeroCarouselProps) {
 
   // Función para retroceder al slide anterior
   const prevSlide = () => {
-    if (isTransitioning) return
+    if (isTransitioning || filteredHeroSections.length <= 1) return
     setIsTransitioning(true)
     setDirection(-1)
-    setCurrentIndex((prevIndex) => (prevIndex === 0 ? heroSections.length - 1 : prevIndex - 1))
+    setCurrentIndex((prevIndex) => (prevIndex === 0 ? filteredHeroSections.length - 1 : prevIndex - 1))
     resetProgress()
 
     // Desactivar el estado de transición después de que termine
@@ -76,7 +87,7 @@ export function HeroCarousel({ heroSections }: HeroCarouselProps) {
 
   // Función para ir a un slide específico
   const goToSlide = (index: number) => {
-    if (index === currentIndex || isTransitioning) return
+    if (index === currentIndex || isTransitioning || filteredHeroSections.length <= 1) return
 
     setIsTransitioning(true)
     setDirection(index > currentIndex ? 1 : -1)
@@ -123,7 +134,7 @@ export function HeroCarousel({ heroSections }: HeroCarouselProps) {
   }
 
   const handleDragEnd = (_: any, info: PanInfo) => {
-    if (isTransitioning) return
+    if (isTransitioning || filteredHeroSections.length <= 1) return
 
     const dragEndX = info.point.x
     const diff = dragStartX.current - dragEndX
@@ -185,6 +196,8 @@ export function HeroCarousel({ heroSections }: HeroCarouselProps) {
 
   // Efecto para el autoplay y progreso
   useEffect(() => {
+    if (filteredHeroSections.length <= 1) return
+
     if (!isPaused && !isTransitioning) {
       startAutoplay()
       startProgressTimer()
@@ -211,11 +224,13 @@ export function HeroCarousel({ heroSections }: HeroCarouselProps) {
         clearInterval(progressTimerRef.current)
       }
     }
-  }, [isPaused, isTransitioning, currentIndex, heroSections.length])
+  }, [isPaused, isTransitioning, currentIndex, filteredHeroSections.length])
 
   // Manejar eventos de teclado
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (filteredHeroSections.length <= 1) return
+
       if (e.key === "ArrowLeft") {
         prevSlide()
       } else if (e.key === "ArrowRight") {
@@ -229,16 +244,16 @@ export function HeroCarousel({ heroSections }: HeroCarouselProps) {
     return () => {
       window.removeEventListener("keydown", handleKeyDown)
     }
-  }, [isTransitioning])
+  }, [isTransitioning, filteredHeroSections.length])
 
-  // Si no hay secciones, no mostrar nada
-  if (heroSections.length === 0) return null
+  // Si no hay secciones después del filtrado, no mostrar nada
+  if (filteredHeroSections.length === 0) return null
 
   // Si solo hay una sección, mostrarla sin controles
-  if (heroSections.length === 1) {
+  if (filteredHeroSections.length === 1) {
     return (
       <div className="w-screen overflow-hidden mx-auto">
-        <HeroSlide heroSection={heroSections[0]} />
+        <HeroSlide heroSection={filteredHeroSections[0]} />
       </div>
     )
   }
@@ -289,7 +304,7 @@ export function HeroCarousel({ heroSections }: HeroCarouselProps) {
               modifyTarget: (target) => Math.round(target / window.innerWidth) * window.innerWidth,
             }}
           >
-            <HeroSlide heroSection={heroSections[currentIndex]} />
+            <HeroSlide heroSection={filteredHeroSections[currentIndex]} />
           </motion.div>
         </AnimatePresence>
       </div>
@@ -322,26 +337,27 @@ export function HeroCarousel({ heroSections }: HeroCarouselProps) {
       <div className="absolute bottom-6 left-0 right-0 flex justify-center items-center gap-4 z-20">
         {/* Barras de progreso */}
         <div className="flex gap-3 items-center">
-          {heroSections.map((_, index) => (
+          {filteredHeroSections.map((_, index) => (
             <button
-            key={index}
-            onClick={() => goToSlide(index)}
-            className={`group relative h-1.5 rounded-full overflow-hidden transition-all duration-300 hover:bg-background/50 ${
-              index === currentIndex ? "bg-background/40 scale-[1.05]  w-[60px] md:w-[100px]" : "bg-background/30 w-[40px] md:w-[70px]"
-            }`}
-            aria-label={`Ir a la diapositiva ${index + 1}`}
-            disabled={isTransitioning}
-          >
-            {index === currentIndex && (
-              <motion.div
-                className="absolute inset-0 bg-white"
-                initial={{ width: 0 }}
-                animate={{ width: `${progress}%` }}
-                transition={{ duration: 0.1, ease: "linear" }}
-              />
-            )}
-          </button>
-          
+              key={index}
+              onClick={() => goToSlide(index)}
+              className={`group relative h-1.5 rounded-full overflow-hidden transition-all duration-300 hover:bg-background/50 ${
+                index === currentIndex
+                  ? "bg-background/40 scale-[1.05]  w-[60px] md:w-[100px]"
+                  : "bg-background/30 w-[40px] md:w-[70px]"
+              }`}
+              aria-label={`Ir a la diapositiva ${index + 1}`}
+              disabled={isTransitioning}
+            >
+              {index === currentIndex && (
+                <motion.div
+                  className="absolute inset-0 bg-white"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progress}%` }}
+                  transition={{ duration: 0.1, ease: "linear" }}
+                />
+              )}
+            </button>
           ))}
         </div>
 
