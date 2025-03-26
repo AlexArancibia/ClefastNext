@@ -54,7 +54,7 @@ export function Navbar() {
   }, 0)
 
   return (
-    <nav className="bg-background/50 backdrop-blur-md border-b sticky top-0 z-[180]">
+    <nav className="bg-background/100 backdrop-blur-md border-b sticky top-0 z-[180]">
       <div className="container-section py-3">
         <div className="content-section">
           <div className="flex items-center justify-between">

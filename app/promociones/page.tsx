@@ -5,7 +5,7 @@ import { useMainStore } from "@/stores/mainStore"
 import { Card, CardContent } from "@/components/ui/card"
 import { Loader2 } from "lucide-react"
 import { motion } from "framer-motion"
-import { HeroCarousel } from "./_components/hero-carousel"
+import { HeroCarouselBase } from "@/components/HeroCaruselBase"
 
 export default function PromocionesPage() {
   const { heroSections, fetchHeroSections } = useMainStore()
@@ -15,11 +15,12 @@ export default function PromocionesPage() {
   useEffect(() => {
     const loadHeroSections = async () => {
       try {
+        console.log("PromocionesPage - Loading hero sections...")
         setIsLoading(true)
         await fetchHeroSections()
         setError(null)
       } catch (err) {
-        console.error("Error al cargar las promociones:", err)
+        console.error("PromocionesPage - Error al cargar las promociones:", err)
         setError("No se pudieron cargar las promociones. Por favor, intenta de nuevo más tarde.")
       } finally {
         setIsLoading(false)
@@ -29,8 +30,21 @@ export default function PromocionesPage() {
     loadHeroSections()
   }, [fetchHeroSections])
 
-  // Filtrar solo las secciones activas
-  const activeHeroSections = heroSections.filter((section) => section.isActive)
+  // Filtrar solo las secciones con metadata.section = "promociones" y que estén activas
+  const filteredSections = Array.isArray(heroSections)
+    ? heroSections.filter((section) => {
+        return (
+          section.isActive &&
+          section.metadata &&
+          typeof section.metadata === "object" &&
+          "section" in section.metadata &&
+          section.metadata.section === "promociones"
+        )
+      })
+    : []
+
+  console.log("PromocionesPage - Filtered sections:", filteredSections.length)
+  console.log("PromocionesPage - First section:", filteredSections[0]?.id)
 
   if (isLoading) {
     return (
@@ -52,7 +66,7 @@ export default function PromocionesPage() {
     )
   }
 
-  if (activeHeroSections.length === 0) {
+  if (filteredSections.length === 0) {
     return (
       <div className="container max-w-7xl mx-auto py-10 px-4">
         <Card>
@@ -67,7 +81,7 @@ export default function PromocionesPage() {
   return (
     <div className="w-full overflow-hidden flex justify-center">
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8 }} className="w-full">
-        <HeroCarousel heroSections={activeHeroSections} />
+        <HeroCarouselBase heroSections={filteredSections} />
       </motion.div>
     </div>
   )

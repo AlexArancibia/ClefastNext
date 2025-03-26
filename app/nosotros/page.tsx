@@ -7,132 +7,19 @@ import { Button } from "@/components/ui/button"
 import { Beaker, Lightbulb, Leaf, Heart, Users, ChevronRight, MessageSquare, BookOpen, Goal, Eye } from "lucide-react"
 import Link from "next/link"
 import { Testimonials } from "./_components/Testimonial"
+import { AboutHeroSection } from "@/components/AboutHeroSection"
+import { MissionVisionSection } from "@/components/MisionVision"
 
 export default function AboutPage() {
  
   return (
     <main className=" ">
       {/* Hero Section with Video Background */}
-      <section className="relative w-full h-screen">
-  {/* Video Background */}
-  <div className="absolute inset-0 w-full h-full overflow-hidden">
-    {/* Overlay con gradiente */}
-    <div className="absolute inset-0 bg-gradient-to-r from-blue-950  to-black/20 z-10"></div>
-
-    {/* Video ocupando toda la pantalla */}
-    <video
-      src="/video.mp4"
-      autoPlay
-      loop
-      muted
-      playsInline
-      className="absolute inset-0 w-full h-full object-cover"
-    />
-  </div>
-
-  {/* Contenido del Hero */}
-  <div className="relative z-20 flex items-center justify-start w-full h-full px-6 md:px-12 lg:px-20">
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className="content-section  text-white "
-    >
-      {/* Icono superior */}
-      <div className="mb-6 flex items-center">
-        <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mb-4">
-          <BookOpen />
-        </div>
-      </div>
-
-      {/* Título y subtítulo */}
-      <h1 className="text-4xl md:text-[80px] mb-10 font-bold">
-        Quiénes somos 
-      </h1>
-      <p className="text-lg md:text-2xl font-semibold mt-2">
-      Facilitamos los procesos de lavado industrial
-      </p>
-
-      {/* Descripción */}
-      <p className="text-base md:text-lg mt-4 leading-relaxed w-full md:w-1/2">
-      Conocemos de cerca los desafíos del lavado industrial. Día a día asesoramos a empresas que buscan
-              marcar la diferencia en su servicio de lavandería. Escuchar nos ha llevado a innovar. Nuestros productos
-              son usados en numerosos hoteles y lavanderías del Perú, han desafiado las convenciones con un enfoque
-              ecológico y han ayudado a muchas lavanderías a estar más cerca de su éxito comercial al optimizar sus
-              procesos de lavado.
-      </p>
-    </motion.div>
-  </div>
-</section>
-
+      <AboutHeroSection />
       {/* Mission and Vision */}
-      <section className="py-16 bg-white pb-0 md:pb-8">
+      <MissionVisionSection />
 
-        
-        <div className="container mx-auto px-4">
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-              className="bg-blue-50 rounded-2xl p-8 flex flex-col items-center text-center"
-            >
-              <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center mb-6">
-                <Goal className="w-10 h-10 text-blue-700" />
-              </div>
-              <h3 className="text-xl font-semibold mb-4">Misión</h3>
-              <p className="text-gray-600 mb-6">
-              Nuestra forma de trabajo va más allá de hacer lo de siempre, innovamos y desarrollamos insumos de alta
-              calidad que optimizan los procesos y mejoran la eficiencia de cada operación en las industrias del lavado.
-              Somos aliados comprometidos en el crecimiento y el éxito de nuestros clientes, contribuyendo al desarrollo
-              en la industria del lavado.
-              </p>
  
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ once: true }}
-              className="bg-green-50 rounded-2xl p-8 flex flex-col items-center text-center"
-            >
-              <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mb-6">
-                <Eye className="w-10 h-10 text-green-700" />
-              </div>
-              <h3 className="text-xl font-semibold mb-4">Visión</h3>
-              <p className="text-gray-600 mb-6">
-              Nuestra visión es claramente CLEFAST; nos adaptamos a las necesidades específicas de nuestros clientes y
-              buscamos que cada vez sean más las empresas de Latinoamérica que se sumen trabajar con soluciones
-              integrales que incluyan productos de alta calidad y tecnologías de limpieza comprometidos con el cuidado
-              ambiental.
-              </p>
- 
-
-
-            </motion.div>
-          </div> 
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="max-w-4xl mx-auto space-y-8 text-center"
-          >
- 
-            <div className="pt-16  border-gray-200">
-              <p className="text-xl font-semibold text-blue-700 italic">
-                "Queremos contribuir a un futuro sostenible, mejorando la calidad de vida de todos y promoviendo
-                prácticas responsables de higiene y limpieza de diversas industrias."
-              </p>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Icons Section */}
  
       {/* Values Section */}
       <section className="py-16 bg-gray-50">
