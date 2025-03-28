@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo, useEffect, Suspense } from "react"
 import { motion } from "framer-motion"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -32,7 +32,7 @@ interface Filters {
   priceRange: [number, number]
 }
 
-export default function ProductList({
+function ProductListContent({
   initialSearchTerm = "",
   initialCategories = [],
   initialPage = 1,
@@ -295,3 +295,34 @@ export default function ProductList({
   )
 }
 
+export default function ProductList(props: ProductListProps) {
+  return (
+    <Suspense fallback={
+      <div className="flex flex-col lg:flex-row gap-16">
+        <aside className="hidden lg:block w-72 flex-shrink-0">
+          {/* Placeholder para los filtros */}
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 bg-gray-200 rounded"></div>
+            <div className="h-4 bg-gray-200 rounded"></div>
+            <div className="h-4 bg-gray-200 rounded"></div>
+            <div className="h-8 bg-gray-200 rounded"></div>
+          </div>
+        </aside>
+        <div className="flex-1">
+          {/* Placeholder para los productos */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="animate-pulse">
+                <div className="h-64 bg-gray-200 rounded"></div>
+                <div className="mt-2 h-4 bg-gray-200 rounded"></div>
+                <div className="mt-2 h-4 bg-gray-200 w-3/4   rounded"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    }>
+      <ProductListContent {...props} />
+    </Suspense>
+  )
+}

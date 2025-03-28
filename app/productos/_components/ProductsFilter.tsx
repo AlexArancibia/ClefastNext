@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo, useEffect, Suspense } from "react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
@@ -25,7 +25,7 @@ interface Filters {
   priceRange: [number, number]
 }
 
-export function ProductFilters({ onFilterChange, initialFilters, minPrice, maxPrice }: ProductFiltersProps) {
+function ProductFiltersContent({ onFilterChange, initialFilters, minPrice, maxPrice }: ProductFiltersProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -50,7 +50,6 @@ export function ProductFilters({ onFilterChange, initialFilters, minPrice, maxPr
 
   // Apply filters when they change
   useEffect(() => {
-    // Only update if the values have actually changed
     const currentFilters = {
       searchTerm: debouncedSearchTerm,
       categories: selectedCategories,
@@ -58,7 +57,6 @@ export function ProductFilters({ onFilterChange, initialFilters, minPrice, maxPr
       priceRange,
     }
 
-    // Deep comparison to avoid unnecessary updates
     const hasChanged =
       initialFilters.searchTerm !== currentFilters.searchTerm ||
       JSON.stringify(initialFilters.categories) !== JSON.stringify(currentFilters.categories) ||
@@ -119,8 +117,6 @@ export function ProductFilters({ onFilterChange, initialFilters, minPrice, maxPr
     setSelectedCategories([])
     setSelectedVariants({})
     setPriceRange([minPrice, maxPrice])
-
-    // Clear URL parameters and navigate to base products page
     router.replace(pathname)
   }
 
@@ -210,3 +206,54 @@ export function ProductFilters({ onFilterChange, initialFilters, minPrice, maxPr
   )
 }
 
+export function ProductFilters(props: ProductFiltersProps) {
+  return (
+    <Suspense fallback={
+      <div className="w-72 bg-white space-y-6 animate-pulse">
+        {/* Search Placeholder */}
+        <div className="h-10 bg-gray-200 rounded"></div>
+        
+        {/* Categories Placeholder */}
+        <div>
+          <div className="h-6 w-24 bg-gray-200 rounded mb-4"></div>
+          <div className="space-y-2">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex items-center space-x-2">
+                <div className="h-4 w-4 bg-gray-200 rounded"></div>
+                <div className="h-4 w-24 bg-gray-200 rounded"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        {/* Price Range Placeholder */}
+        <div>
+          <div className="h-6 w-16 bg-gray-200 rounded mb-4"></div>
+          <div className="h-2 bg-gray-200 rounded-full"></div>
+          <div className="flex justify-between mt-2">
+            <div className="h-4 w-12 bg-gray-200 rounded"></div>
+            <div className="h-4 w-12 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+        
+        {/* Variant Attributes Placeholder */}
+        <div>
+          <div className="h-6 w-32 bg-gray-200 rounded mb-4"></div>
+          <div className="space-y-2">
+            {[...Array(2)].map((_, i) => (
+              <div key={i} className="flex items-center space-x-2">
+                <div className="h-4 w-4 bg-gray-200 rounded"></div>
+                <div className="h-4 w-20 bg-gray-200 rounded"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        {/* Button Placeholder */}
+        <div className="h-10 bg-gray-200 rounded"></div>
+      </div>
+    }>
+      <ProductFiltersContent {...props} />
+    </Suspense>
+  )
+}
