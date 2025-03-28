@@ -1,21 +1,19 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { motion } from "framer-motion"
 import { useSearchParams } from "next/navigation"
 import ProductList from "./_components/ProductList"
 import ProductListSkeleton from "./_components/ProductListSkeleton"
 
-export default function ProductsPage() {
+function ProductsContent() {
   const searchParams = useSearchParams()
   const [isClient, setIsClient] = useState(false)
 
-  // Set isClient to true after component mounts
   useEffect(() => {
     setIsClient(true)
   }, [])
 
-  // Only process search params on the client to avoid hydration issues
   if (!isClient) {
     return (
       <main className="min-h-screen bg-white">
@@ -113,3 +111,24 @@ export default function ProductsPage() {
   )
 }
 
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen bg-white">
+        <div className="container-section py-16 md:py-16 bg-[url('/fondoproduct.jpg')] bg-cover">
+          <div className="content-section text-center">
+            <h2 className="text-white mb-2">Nuestros Productos</h2>
+            <p className="text-white/90 text-lg">Descubre nuestra línea completa de productos de limpieza industrial</p>
+          </div>
+        </div>
+        <div className="container-section py-8 md:py-16">
+          <div className="content-section">
+            <ProductListSkeleton />
+          </div>
+        </div>
+      </main>
+    }>
+      <ProductsContent />
+    </Suspense>
+  )
+}
