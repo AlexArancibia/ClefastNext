@@ -73,7 +73,7 @@ export function HeroSlide({ heroSection, animationDelay = 0, preload = false }: 
     contentPadding = {
       mobile: "py-8 px-4",
       tablet: "py-12 px-6",
-      desktop: "py-16 px-8",
+      desktop: " ",
     },
     height = {
       mobile: "min-h-screen",
@@ -90,7 +90,7 @@ export function HeroSlide({ heroSection, animationDelay = 0, preload = false }: 
       tablet: "text-[1em]",
       desktop: "text-[1em]",
     },
-    backgroundPosition = "bg-center",
+    backgroundPosition = "bg-top md:bg-center",
     backgroundSize = "bg-cover",
     animation = "none",
   } = styles
@@ -383,7 +383,7 @@ export function HeroSlide({ heroSection, animationDelay = 0, preload = false }: 
 
       {/* Contenido - Estructura simplificada */}
       <div
-        className="absolute inset-0 flex w-full h-full"
+        className="absolute inset-0 flex w-full h-full "
         style={{
           display: "flex",
           alignItems:
@@ -397,20 +397,15 @@ export function HeroSlide({ heroSection, animationDelay = 0, preload = false }: 
       >
         <div className="container mx-auto px-4 md:px-6 h-full flex">
           <div
-            className={cn("w-full flex", justifyClass)}
+            className={cn("w-full flex pt-20 md:pb-20 items-start md:items-center", justifyClass)}
             style={{
               height: "100%",
               display: "flex",
-              alignItems:
-                verticalAlignClass === "items-start"
-                  ? "flex-start"
-                  : verticalAlignClass === "items-end"
-                    ? "flex-end"
-                    : "center",
+ 
             }}
           >
             <motion.div
-              className={cn("space-y-6", textAlignClass, contentWidthValue, paddingValue)}
+              className={cn("space-y-6 ", textAlignClass, contentWidthValue, paddingValue)}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{

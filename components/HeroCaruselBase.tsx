@@ -327,7 +327,7 @@ export function HeroCarouselBase({
           <Button
             variant="ghost"
             size="icon"
-            className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-white/20 text-white shadow-md pointer-events-auto hover:bg-white/30 transition-all duration-200 z-20 hover:scale-110 backdrop-blur-sm"
+            className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-white/20 text-secondary shadow-md pointer-events-auto hover:bg-white/30 transition-all duration-200 z-20 hover:scale-110 backdrop-blur-sm"
             onClick={prevSlide}
             aria-label="Slide anterior"
             disabled={isTransitioning}
@@ -337,7 +337,7 @@ export function HeroCarouselBase({
           <Button
             variant="ghost"
             size="icon"
-            className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-white/20 text-white shadow-md pointer-events-auto hover:bg-white/30 transition-all duration-200 z-20 hover:scale-110 backdrop-blur-sm"
+            className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-white/20 text-secondary shadow-md pointer-events-auto hover:bg-white/30 transition-all duration-200 z-20 hover:scale-110 backdrop-blur-sm"
             onClick={nextSlide}
             aria-label="Siguiente slide"
             disabled={isTransitioning}
@@ -359,15 +359,15 @@ export function HeroCarouselBase({
                   onClick={() => goToSlide(index)}
                   className={`group relative h-1.5 rounded-full overflow-hidden transition-all duration-300 hover:bg-white/60 ${
                     index === currentIndex
-                      ? "bg-white/50 scale-[1.05] w-[50px] md:w-[80px]"
-                      : "bg-white/30 w-[30px] md:w-[50px]"
+                      ? "bg-primary/50 scale-[1.05] w-[50px] md:w-[80px]"
+                      : "bg-primary/30 w-[30px] md:w-[50px]"
                   }`}
                   aria-label={`Ir a la diapositiva ${index + 1}`}
                   disabled={isTransitioning}
                 >
                   {index === currentIndex && (
                     <motion.div
-                      className="absolute inset-0 bg-white"
+                      className="absolute inset-0 bg-primary"
                       initial={{ width: 0 }}
                       animate={{ width: `${progress}%` }}
                       transition={{ duration: 0.1, ease: "linear" }}
@@ -383,7 +383,7 @@ export function HeroCarouselBase({
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 rounded-full bg-white/20 text-white shadow-md hover:bg-white/30 transition-all duration-200 hover:scale-110 backdrop-blur-sm"
+              className="h-8 w-8 rounded-full bg-white/20 text-primary shadow-md hover:bg-white/30 transition-all duration-200 hover:scale-110 backdrop-blur-sm"
               onClick={togglePause}
               aria-label={isPaused ? "Reproducir" : "Pausar"}
             >

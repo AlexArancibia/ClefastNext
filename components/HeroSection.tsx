@@ -60,15 +60,15 @@ export function HeroSection() {
   if (error) {
     console.error("Error en hero sections:", error)
     return (
-      <div className="w-full h-[50vh] flex items-center justify-center">
+      <div className="w-full h-[50vh] flex items-center justify-center ]">
         <div className="text-red-500">{error}</div>
       </div>
     )
   }
 
   return (
-    <div className="w-full overflow-hidden">
-      <HeroCarouselBase heroSections={filteredSections} autoplayInterval={10000} containerHeight="calc(100vh - 60px)" />
+    <div className="w-full overflow-hidden -mt-[60px]">
+      <HeroCarouselBase heroSections={filteredSections} autoplayInterval={10000} containerHeight="calc(100vh)" />
     </div>
   )
 }

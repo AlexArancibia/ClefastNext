@@ -2,28 +2,31 @@
 
 import { useEffect } from "react"
 import { useMainStore } from "@/stores/mainStore"
- 
 import { Skeleton } from "@/components/ui/skeleton"
- 
 import { PostCard } from "./_components/PostCard"
- 
 import { FeaturedContent } from "./_components/FeaturedPost"
 
 export default function BlogPage() {
   const { contents, fetchContents, loading } = useMainStore()
 
   useEffect(() => {
-    fetchContents()
-  }, [fetchContents])
+    if (contents.length === 0) {
+      fetchContents()
+    }
+  }, [fetchContents, contents.length])
 
-  const featuredPost = contents[0]
+  const filteredContents = contents
+    .filter(content => content.type !== "PAGE")
+    .reverse() // Invierte el orden de los posts
+
+  const featuredPost = filteredContents[0]
 
   if (loading) {
     return <BlogSkeleton />
   }
 
   return (
-    <main className="  bg-gray-50  ">
+    <main className="bg-gray-50">
       <div className="container-section py-8">
         <div className="content-section">
           {/* Featured Post */}
@@ -31,15 +34,12 @@ export default function BlogPage() {
 
           {/* Regular Posts Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-16">
-            {contents.map((content, index) => (
+            {filteredContents.map((content, index) => (
               <PostCard key={content.id} content={content} index={index} />
             ))}
           </div>
         </div>
       </div>
-
-      {/* Testimonials Section */}
- 
     </main>
   )
 }
@@ -62,4 +62,3 @@ function BlogSkeleton() {
     </div>
   )
 }
-

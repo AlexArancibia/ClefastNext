@@ -1,9 +1,11 @@
 "use client"
 
+import type React from "react"
+
 import Link from "next/link"
 import Image from "next/image"
-import { usePathname } from "next/navigation"
-import { Menu, ShoppingCart, User, X } from "lucide-react"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { Menu, ShoppingCart, User, X, Search } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
@@ -14,6 +16,8 @@ import { useAuthStore } from "@/stores/authStore"
 import { UserDropdown } from "@/components/auth/user-dropdown"
 import { AuthModal } from "@/components/auth/auth-modal"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 
 const navItems = [
   { name: "Inicio", href: "/" },
@@ -22,18 +26,21 @@ const navItems = [
   { name: "Promociones", href: "/promociones" },
   { name: "Catálogo", href: "/catalogo" },
   { name: "Blog", href: "/blog" },
-  { name: "Contactenos", href: "/contactenos" },
-  
+  { name: "Contáctenos", href: "/contactenos" },
 ]
 
 export function Navbar() {
   const pathname = usePathname()
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const { items, removeItem } = useCartStore()
   const { shopSettings } = useMainStore()
   const defaultCurrency = shopSettings[0]?.defaultCurrency
   const { isAuthenticated, checkAuth } = useAuthStore()
 
   const [authChecking, setAuthChecking] = useState(true)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
 
   useEffect(() => {
     const checkAuthStatus = async () => {
@@ -52,6 +59,46 @@ export function Navbar() {
     const price = item.variant.prices.find((p) => p.currencyId === defaultCurrency?.id)?.price || 0
     return sum + price * item.quantity
   }, 0)
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchTerm.trim()) {
+      // Crear un nuevo objeto URLSearchParams
+      const params = new URLSearchParams()
+
+      // Añadir el término de búsqueda
+      params.set("search", searchTerm.trim())
+
+      // Si estamos en la página de productos, conservar otros parámetros importantes
+      if (pathname === "/productos") {
+        // Conservar parámetros como sort, page, etc., pero no search (ya lo estamos estableciendo)
+        searchParams.forEach((value, key) => {
+          if (key !== "search" && key !== "page") {
+            params.set(key, value)
+          }
+        })
+
+        // Resetear a página 1 cuando se hace una nueva búsqueda
+        params.delete("page")
+      }
+
+      // Construir la URL
+      const url = `/productos?${params.toString()}`
+
+      // Si ya estamos en la página de productos, usar replace para forzar una actualización
+      if (pathname === "/productos") {
+        router.replace(url)
+      } else {
+        router.push(url)
+      }
+
+      // Cerrar el diálogo
+      setIsSearchOpen(false)
+
+      // Limpiar el término de búsqueda después de buscar
+      setSearchTerm("")
+    }
+  }
 
   return (
     <nav className="bg-background/100 backdrop-blur-md border-b sticky top-0 z-[180]">
@@ -90,6 +137,41 @@ export function Navbar() {
 
             {/* Search and Icons */}
             <div className="flex items-center justify-end w-3/4 lg:w-1/3 xl:w-1/4 gap-4">
+              {/* Search Icon and Dialog */}
+              <Dialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-secondary hover:text-primary hover:bg-secondary/10"
+                    aria-label="Buscar productos"
+                  >
+                    <Search className="h-5 w-5" aria-hidden="true" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="w-[400px] sm:max-w-md   z-[555] bg-background/95 backdrop-blur-md border-none shadow-lg">
+                  <DialogTitle className="text-xl font-semibold text-center">Buscar productos</DialogTitle>
+                  <form onSubmit={handleSearch} className="flex flex-col gap-4 mt-2">
+                    <div className="flex w-full items-center space-x-2">
+                      <Input
+                        type="text"
+                        placeholder="¿Qué estás buscando?"
+                        className="flex-1"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        autoFocus
+                      />
+                      <Button type="submit">Buscar</Button>
+                    </div>
+                    {searchTerm.length > 0 && (
+                      <p className="text-sm text-muted-foreground">
+                        Presiona Enter para buscar &quot;{searchTerm}&quot;
+                      </p>
+                    )}
+                  </form>
+                </DialogContent>
+              </Dialog>
+
               {/* Cart Icon and Drawer */}
               <Sheet>
                 <SheetTrigger asChild>
@@ -153,7 +235,7 @@ export function Navbar() {
                           {totalPrice.toFixed(2)}
                         </p>
                         <div className="flex gap-2">
-                        <SheetClose asChild>
+                          <SheetClose asChild>
                             <Button asChild className="flex-1" variant="outline">
                               <Link href="/cart">Ver Carrito</Link>
                             </Button>

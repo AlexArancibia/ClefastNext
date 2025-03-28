@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { motion } from "framer-motion"
+import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
- 
+
 import type { Product } from "@/types/product"
 import type { Category } from "@/types/category"
 import { useMainStore } from "@/stores/mainStore"
@@ -13,10 +14,17 @@ import { ProductCard } from "@/components/ProductCard"
 import { Pagination } from "./Pagination"
 
 const PRODUCTS_PER_PAGE = 9
-interface ProductFiltersProps {
-  onFilterChange: (filters: Filters) => void
-  onResetFilters: () => void
+
+interface ProductListProps {
+  initialSearchTerm?: string
+  initialCategories?: string[]
+  initialPage?: number
+  initialSortBy?: string
+  initialMinPrice?: number
+  initialMaxPrice?: number
+  initialVariantFilters?: Record<string, string[]>
 }
+
 interface Filters {
   searchTerm: string
   categories: string[]
@@ -24,18 +32,122 @@ interface Filters {
   priceRange: [number, number]
 }
 
-export default function ProductList() {
+export default function ProductList({
+  initialSearchTerm = "",
+  initialCategories = [],
+  initialPage = 1,
+  initialSortBy = "featured",
+  initialMinPrice,
+  initialMaxPrice,
+  initialVariantFilters = {},
+}: ProductListProps) {
   const { products, shopSettings } = useMainStore()
-  const [sortBy, setSortBy] = useState("featured")
-  const [filters, setFilters] = useState<Filters>({
-    searchTerm: "",
-    categories: [],
-    variants: {},
-    priceRange: [0, Number.POSITIVE_INFINITY],
-  })
-  const [currentPage, setCurrentPage] = useState(1)
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
 
   const defaultCurrency = shopSettings[0]?.defaultCurrency
+
+  // Calculate min and max prices from products
+  const { minPrice: calculatedMinPrice, maxPrice: calculatedMaxPrice } = useMemo(() => {
+    if (!products || products.length === 0) {
+      return { minPrice: 0, maxPrice: 1000 } // Valores predeterminados seguros
+    }
+
+    let min = Number.POSITIVE_INFINITY
+    let max = Number.NEGATIVE_INFINITY
+
+    products.forEach((product: Product) => {
+      product.variants.forEach((variant) => {
+        const price = variant.prices.find((p) => p.currencyId === defaultCurrency?.id)?.price || 0
+        if (price > 0) {
+          // Solo considerar precios válidos mayores que cero
+          min = Math.min(min, price)
+          max = Math.max(max, price)
+        }
+      })
+    })
+
+    // Si después de procesar todos los productos, aún tenemos valores infinitos, usar valores predeterminados
+    if (!isFinite(min) || !isFinite(max) || min > max) {
+      return { minPrice: 0, maxPrice: 1000 }
+    }
+
+    return { minPrice: Math.floor(min), maxPrice: Math.ceil(max) }
+  }, [products, defaultCurrency])
+
+  // Use initial values or calculated values
+  const [sortBy, setSortBy] = useState(initialSortBy)
+  const [currentPage, setCurrentPage] = useState(initialPage)
+  const [filters, setFilters] = useState<Filters>({
+    searchTerm: initialSearchTerm,
+    categories: initialCategories,
+    variants: initialVariantFilters,
+    priceRange: [
+      initialMinPrice !== undefined && isFinite(initialMinPrice)
+        ? initialMinPrice
+        : isFinite(calculatedMinPrice)
+          ? calculatedMinPrice
+          : 0,
+      initialMaxPrice !== undefined && isFinite(initialMaxPrice)
+        ? initialMaxPrice
+        : isFinite(calculatedMaxPrice)
+          ? calculatedMaxPrice
+          : 1000,
+    ],
+  })
+
+  // Update URL when filters change
+  useEffect(() => {
+    // Create a new URLSearchParams object
+    const newParams = new URLSearchParams()
+
+    // Update search term
+    if (filters.searchTerm) {
+      newParams.set("search", filters.searchTerm)
+    }
+
+    // Update categories
+    filters.categories.forEach((category) => {
+      newParams.append("category", category)
+    })
+
+    // Update price range
+    if (filters.priceRange[0] !== calculatedMinPrice) {
+      newParams.set("minPrice", filters.priceRange[0].toString())
+    }
+
+    if (filters.priceRange[1] !== calculatedMaxPrice) {
+      newParams.set("maxPrice", filters.priceRange[1].toString())
+    }
+
+    // Update variant filters
+    Object.entries(filters.variants).forEach(([attribute, values]) => {
+      if (values.length > 0) {
+        newParams.set(`variant_${attribute}`, values.join(","))
+      }
+    })
+
+    // Update sort
+    if (sortBy !== "featured") {
+      newParams.set("sort", sortBy)
+    }
+
+    // Update page
+    if (currentPage !== 1) {
+      newParams.set("page", currentPage.toString())
+    }
+
+    // Compare current and new URL params to avoid unnecessary updates
+    const currentParams = searchParams.toString()
+    const newParamsString = newParams.toString()
+
+    // Only update if the parameters have actually changed
+    if (currentParams !== newParamsString) {
+      // Update URL without refreshing the page
+      router.replace(`${pathname}?${newParamsString}`, { scroll: false })
+    }
+  }, [filters, sortBy, currentPage, pathname, router, calculatedMinPrice, calculatedMaxPrice, searchParams])
 
   const filteredProducts = useMemo(() => {
     return products.filter((product: Product) => {
@@ -54,10 +166,11 @@ export default function ProductList() {
 
       // Filter by variants
       const variantMatches = Object.entries(filters.variants).every(([attribute, values]) => {
-        return product.variants.some(
-          (variant) =>
-            values.length === 0 ||
+        return (
+          values.length === 0 ||
+          product.variants.some((variant) =>
             values.includes(variant.attributes[attribute as keyof typeof variant.attributes] as string),
+          )
         )
       })
       if (!variantMatches) {
@@ -104,25 +217,45 @@ export default function ProductList() {
 
   const handleFilterChange = (newFilters: Filters) => {
     setFilters(newFilters)
-    setCurrentPage(1)
+    setCurrentPage(1) // Reset to first page when filters change
+  }
+
+  const handleSortChange = (value: string) => {
+    setSortBy(value)
+  }
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+    // Scroll to top when changing pages
+    window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
   return (
     <div className="flex flex-col lg:flex-row gap-16">
       {/* Sidebar con filtros (visible solo en desktop) */}
       <aside className="hidden lg:block w-72 flex-shrink-0">
-        <ProductFilters onFilterChange={handleFilterChange} />
+        <ProductFilters
+          onFilterChange={handleFilterChange}
+          initialFilters={filters}
+          minPrice={calculatedMinPrice}
+          maxPrice={calculatedMaxPrice}
+        />
       </aside>
 
       {/* Productos */}
       <div className="flex-1">
         {/* Controles superiores */}
         <div className="flex justify-between items-center mb-6">
-          <FilterDrawer onFilterChange={handleFilterChange} />
+          <FilterDrawer
+            onFilterChange={handleFilterChange}
+            initialFilters={filters}
+            minPrice={calculatedMinPrice}
+            maxPrice={calculatedMaxPrice}
+          />
           <p className="text-sm text-muted-foreground hidden sm:block">
             Mostrando {paginatedProducts.length} de {sortedProducts.length} productos
           </p>
-          <Select value={sortBy} onValueChange={setSortBy}>
+          <Select value={sortBy} onValueChange={handleSortChange}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Ordenar por" />
             </SelectTrigger>
@@ -144,10 +277,19 @@ export default function ProductList() {
           ))}
         </div>
 
+        {/* Mensaje si no hay productos */}
+        {paginatedProducts.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-lg text-gray-500">No se encontraron productos con los filtros seleccionados.</p>
+          </div>
+        )}
+
         {/* Paginación */}
-        <div className="mt-8">
-          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-        </div>
+        {totalPages > 1 && (
+          <div className="mt-8">
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+          </div>
+        )}
       </div>
     </div>
   )

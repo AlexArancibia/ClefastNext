@@ -103,7 +103,7 @@ export function ContactForm() {
           <motion.h2 variants={itemVariants} className="text-gray-900 mb-4">
             Contáctanos
           </motion.h2>
-          <motion.p variants={itemVariants} className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
+          <motion.p variants={itemVariants} className="text-base md:text-base text-gray-600 max-w-2xl mx-auto">
             Estamos aquí para responder a tus preguntas y ayudarte con tus necesidades de limpieza industrial. No dudes
             en ponerte en contacto con nosotros para obtener más información sobre nuestros productos y servicios.
           </motion.p>
@@ -118,42 +118,49 @@ export function ContactForm() {
           >
             <div className="grid md:grid-cols-2">
               {/* Información de contacto */}
-              <motion.div variants={itemVariants} className="bg-primary text-primary-foreground p-8">
-                <motion.h2 variants={itemVariants} className="text-2xl font-bold mb-6">
-                  Información de Contacto
-                </motion.h2>
-                <motion.p variants={itemVariants} className="mb-6 text-primary-foreground/80">
-                  Estamos aquí para ayudarte. No dudes en contactarnos para cualquier consulta sobre nuestros productos
-                  o servicios de limpieza industrial.
-                </motion.p>
-                <motion.div variants={containerVariants} className="space-y-4">
-                  <motion.div variants={itemVariants} className="flex items-start">
-                    <MapPin className="w-6 h-6 mr-3 flex-shrink-0" />
-                    <p>{CONTACT_INFO.address}</p>
-                  </motion.div>
-                  <motion.div variants={itemVariants} className="flex items-center">
-                    <Phone className="w-6 h-6 mr-3 flex-shrink-0" />
-                    <div>
-                      <p>{CONTACT_INFO.phone.mobile}</p>
-                      <p>{CONTACT_INFO.phone.landline}</p>
-                    </div>
-                  </motion.div>
-                  <motion.div variants={itemVariants} className="flex items-center">
-                    <Mail className="w-6 h-6 mr-3 flex-shrink-0" />
-                    <p>{CONTACT_INFO.email}</p>
-                  </motion.div>
-                  <motion.div variants={itemVariants} className="flex items-start">
-                    <Clock className="w-6 h-6 mr-3 flex-shrink-0" />
-                    <div>
-                      <p>Lunes - Viernes: 9:00 AM - 6:00 PM</p>
-                    </div>
-                  </motion.div>
-                </motion.div>
-              </motion.div>
+              <motion.div variants={itemVariants} className="relative bg-[url('/contacto.png')] bg-cover bg-center text-primary-foreground p-8">
+  {/* Overlay negro */}
+  <div className="absolute inset-0 bg-black/50" />
 
-              {/* Formulario */}
+  {/* Contenido */}
+  <div className="relative z-10">
+    <motion.h2 variants={itemVariants} className="text-2xl font-bold mb-6">
+      Información de Contacto
+    </motion.h2>
+    <motion.p variants={itemVariants} className="mb-6 text-primary-foreground/80">
+      Estamos aquí para ayudarte. No dudes en contactarnos para cualquier consulta sobre nuestros productos
+      o servicios de limpieza industrial.
+    </motion.p>
+    <motion.div variants={containerVariants} className="space-y-4">
+      <motion.div variants={itemVariants} className="flex items-start">
+        <MapPin className="w-6 h-6 mr-3 flex-shrink-0" />
+        <p>{CONTACT_INFO.address}</p>
+      </motion.div>
+      <motion.div variants={itemVariants} className="flex items-center">
+        <Phone className="w-6 h-6 mr-3 flex-shrink-0" />
+        <div>
+          <p>{CONTACT_INFO.phone.mobile}</p>
+          <p>{CONTACT_INFO.phone.landline}</p>
+        </div>
+      </motion.div>
+      <motion.div variants={itemVariants} className="flex items-center">
+        <Mail className="w-6 h-6 mr-3 flex-shrink-0" />
+        <p>{CONTACT_INFO.email}</p>
+      </motion.div>
+      <motion.div variants={itemVariants} className="flex items-start">
+        <Clock className="w-6 h-6 mr-3 flex-shrink-0" />
+        <div>
+          <p>Lunes - Viernes: 9:00 AM - 6:00 PM</p>
+        </div>
+      </motion.div>
+    </motion.div>
+  </div>
+</motion.div>
+
+
               <motion.div variants={itemVariants} className="p-8">
-                <motion.h2 variants={itemVariants} className="text-2xl font-bold mb-6">
+
+              {/* Formulario */}                <motion.h2 variants={itemVariants} className="text-2xl font-bold mb-6">
                   Envíanos un mensaje
                 </motion.h2>
                 <motion.form variants={containerVariants} onSubmit={handleSubmit(onSubmit)} className="space-y-4">

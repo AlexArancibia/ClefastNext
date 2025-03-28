@@ -8,6 +8,7 @@ import { useMainStore } from "@/stores/mainStore"
 import { useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { WashingTestButton } from "./WashingTestButton"
+import { DeliveryButton } from "./DeliveryButton"
 
 interface ProductSidebarProps {
   product: Product
@@ -36,17 +37,8 @@ export function ProductSidebar({ product }: ProductSidebarProps) {
       {/* Destacados */}
       <div className="space-y-3">
       <WashingTestButton />
-        <div className="border-2 border-blue-100 rounded-2xl p-4 bg-blue-50">
-          <div className="flex items-center gap-3">
-            <div className="bg-white p-2 rounded-lg">
-              <Truck className="w-6 h-6 text-blue-600" />
-            </div>
-            <div>
-              <p className="font-bold text-gray-900">ENVÍOS A TODO</p>
-              <p className="text-blue-600 font-medium">EL PERÚ</p>
-            </div>
-          </div>
-        </div>
+      <DeliveryButton />
+
       </div>
 
       {/* Métodos de envío */}

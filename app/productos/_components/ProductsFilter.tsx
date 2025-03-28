@@ -1,8 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useMemo, useEffect, useCallback } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useMemo, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
@@ -10,9 +9,13 @@ import { Slider } from "@/components/ui/slider"
 import type { Category } from "@/types/category"
 import type { Product } from "@/types/product"
 import { useMainStore } from "@/stores/mainStore"
+import { useRouter, usePathname, useSearchParams } from "next/navigation"
 
 interface ProductFiltersProps {
   onFilterChange: (filters: Filters) => void
+  initialFilters: Filters
+  minPrice: number
+  maxPrice: number
 }
 
 interface Filters {
@@ -22,33 +25,51 @@ interface Filters {
   priceRange: [number, number]
 }
 
-export function ProductFilters({ onFilterChange }: ProductFiltersProps) {
+export function ProductFilters({ onFilterChange, initialFilters, minPrice, maxPrice }: ProductFiltersProps) {
   const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
   const { categories, products, shopSettings } = useMainStore()
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [selectedVariants, setSelectedVariants] = useState<Record<string, string[]>>({})
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000])
-  const [filtersChanged, setFiltersChanged] = useState(false)
+
+  const [searchTerm, setSearchTerm] = useState(initialFilters.searchTerm)
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(initialFilters.categories)
+  const [selectedVariants, setSelectedVariants] = useState<Record<string, string[]>>(initialFilters.variants)
+  const [priceRange, setPriceRange] = useState<[number, number]>(initialFilters.priceRange)
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm)
 
   const defaultCurrency = shopSettings[0]?.defaultCurrency
 
-  const { minPrice, maxPrice } = useMemo(() => {
-    let min = Number.POSITIVE_INFINITY
-    let max = Number.NEGATIVE_INFINITY
-    products.forEach((product: Product) => {
-      product.variants.forEach((variant) => {
-        const price = variant.prices.find((p) => p.currencyId === defaultCurrency?.id)?.price || 0
-        min = Math.min(min, price)
-        max = Math.max(max, price)
-      })
-    })
-    return { minPrice: Math.floor(min), maxPrice: Math.ceil(max) }
-  }, [products, defaultCurrency])
-
+  // Debounce search term to avoid too many updates
   useEffect(() => {
-    setPriceRange([minPrice, maxPrice])
-  }, [minPrice, maxPrice])
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm)
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [searchTerm])
+
+  // Apply filters when they change
+  useEffect(() => {
+    // Only update if the values have actually changed
+    const currentFilters = {
+      searchTerm: debouncedSearchTerm,
+      categories: selectedCategories,
+      variants: selectedVariants,
+      priceRange,
+    }
+
+    // Deep comparison to avoid unnecessary updates
+    const hasChanged =
+      initialFilters.searchTerm !== currentFilters.searchTerm ||
+      JSON.stringify(initialFilters.categories) !== JSON.stringify(currentFilters.categories) ||
+      JSON.stringify(initialFilters.variants) !== JSON.stringify(currentFilters.variants) ||
+      initialFilters.priceRange[0] !== currentFilters.priceRange[0] ||
+      initialFilters.priceRange[1] !== currentFilters.priceRange[1]
+
+    if (hasChanged) {
+      onFilterChange(currentFilters)
+    }
+  }, [debouncedSearchTerm, selectedCategories, selectedVariants, priceRange, onFilterChange, initialFilters])
 
   const variantAttributes = useMemo(() => {
     const attributes: Record<string, Set<string>> = {}
@@ -67,28 +88,10 @@ export function ProductFilters({ onFilterChange }: ProductFiltersProps) {
     return Object.fromEntries(Object.entries(attributes).map(([key, value]) => [key, Array.from(value).sort()]))
   }, [products])
 
-  const applyFilters = useCallback(() => {
-    if (filtersChanged) {
-      const filters: Filters = {
-        searchTerm,
-        categories: selectedCategories,
-        variants: selectedVariants,
-        priceRange,
-      }
-      onFilterChange(filters)
-      setFiltersChanged(false)
-    }
-  }, [searchTerm, selectedCategories, selectedVariants, priceRange, onFilterChange, filtersChanged])
-
-  useEffect(() => {
-    applyFilters()
-  }, [applyFilters])
-
   const handleCategoryChange = (categoryId: string) => {
     setSelectedCategories((prev) =>
       prev.includes(categoryId) ? prev.filter((id) => id !== categoryId) : [...prev, categoryId],
     )
-    setFiltersChanged(true)
   }
 
   const handleVariantChange = (attribute: string, value: string) => {
@@ -101,17 +104,14 @@ export function ProductFilters({ onFilterChange }: ProductFiltersProps) {
           : [...currentValues, value],
       }
     })
-    setFiltersChanged(true)
   }
 
   const handlePriceChange = (value: number[]) => {
     setPriceRange([value[0], value[1]])
-    setFiltersChanged(true)
   }
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value)
-    setFiltersChanged(true)
   }
 
   const resetFilters = () => {
@@ -119,13 +119,13 @@ export function ProductFilters({ onFilterChange }: ProductFiltersProps) {
     setSelectedCategories([])
     setSelectedVariants({})
     setPriceRange([minPrice, maxPrice])
-    setFiltersChanged(true)
-    router.refresh()
+
+    // Clear URL parameters and navigate to base products page
+    router.replace(pathname)
   }
 
   return (
-    <div className="w-72 bg-white space-y-6 ">
-
+    <div className="w-72 bg-white space-y-6">
       {/* Search */}
       <Input
         type="text"
@@ -159,16 +159,25 @@ export function ProductFilters({ onFilterChange }: ProductFiltersProps) {
         <h3 className="text-lg font-medium mb-4">Precio</h3>
         <div className="space-y-4">
           <Slider
-            min={minPrice}
-            max={maxPrice}
+            min={isFinite(minPrice) ? minPrice : 0}
+            max={isFinite(maxPrice) ? maxPrice : 1000}
             step={1}
-            value={priceRange}
+            value={[
+              isFinite(priceRange[0]) ? priceRange[0] : isFinite(minPrice) ? minPrice : 0,
+              isFinite(priceRange[1]) ? priceRange[1] : isFinite(maxPrice) ? maxPrice : 1000,
+            ]}
             onValueChange={handlePriceChange}
             className="w-full"
           />
           <div className="flex justify-between text-sm text-gray-600">
-            <span>{defaultCurrency?.symbol}{priceRange[0]}</span>
-            <span>{defaultCurrency?.symbol}{priceRange[1]}</span>
+            <span>
+              {defaultCurrency?.symbol}
+              {isFinite(priceRange[0]) ? priceRange[0] : 0}
+            </span>
+            <span>
+              {defaultCurrency?.symbol}
+              {isFinite(priceRange[1]) ? priceRange[1] : 1000}
+            </span>
           </div>
         </div>
       </div>
@@ -176,7 +185,7 @@ export function ProductFilters({ onFilterChange }: ProductFiltersProps) {
       {/* Variant Attributes */}
       {Object.entries(variantAttributes).map(([attribute, values]) => (
         <div key={attribute}>
-          <h3 className="text-lg font-medium mb-4  ">{attribute}</h3>
+          <h3 className="text-lg font-medium mb-4">{attribute}</h3>
           <div className="space-y-2 max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300">
             {values.map((value) => (
               <div key={`${attribute}-${value}`} className="flex items-center space-x-2">
@@ -200,3 +209,4 @@ export function ProductFilters({ onFilterChange }: ProductFiltersProps) {
     </div>
   )
 }
+

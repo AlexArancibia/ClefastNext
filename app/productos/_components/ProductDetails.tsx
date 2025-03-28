@@ -19,6 +19,7 @@ import { FrequentlyBoughtTogether } from "./frequentlyBoughtTogether"
 import { ProductCard } from "@/components/ProductCard"
 import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 interface ProductDetailsProps {
   slug: string
@@ -290,17 +291,7 @@ export default function ProductDetails({ slug }: ProductDetailsProps) {
                 className="space-y-6"
               >
                 <label className="text-lg font-medium mb-1.5 block">Descripción</label>
-                <p
-                  className="text-secondary/90 leading-relaxed [&_p]:mb-4 [&_a]:text-blue-600 [&_a]:underline 
-                            [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 
-                            [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:text-xl [&_h2]:font-semibold 
-                            [&_h3]:text-lg [&_h3]:font-medium 
-                            [&_blockquote]:border-l-4 [&_blockquote]:border-gray-400 [&_blockquote]:pl-4 [&_blockquote]:italic 
-                            [&_table]:w-full [&_table]:border [&_table]:border-gray-300 [&_table]:border-collapse 
-                            [&_th]:bg-gray-100 [&_th]:border [&_th]:border-gray-300 [&_th]:text-left [&_th]:px-3 [&_th]:pt-2 [&_th]:font-medium 
-                            [&_td]:border [&_td]:border-gray-300 [&_td]:px-3 [&_td]:pt-2 [&_td]:text-gray-700 [&_td]:whitespace-nowrap"
-                  dangerouslySetInnerHTML={{ __html: product.description ?? "" }}
-                ></p>
+                <ProductSimpleDescription description={product.description ?? ""} />
 
                 {optionKeys.map((optionKey, index) => (
                   <div key={optionKey} className="space-y-2">
@@ -341,7 +332,7 @@ export default function ProductDetails({ slug }: ProductDetailsProps) {
                 <div className="flex gap-4">
                   <div className="flex items-center gap-2">
                     <span className="text-2xl font-bold text-primary">
-                      {mainPrice?.currency.symbol }
+                      {mainPrice?.currency.symbol}
                       {Number(price).toFixed(2)}
                     </span>
                   </div>
@@ -369,6 +360,17 @@ export default function ProductDetails({ slug }: ProductDetailsProps) {
                 )}
               </motion.div>
             </div>
+
+            {/* Product Description Tabs - New Section */}
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.55, duration: 0.5 }}
+              className="border-t pt-8"
+            >
+              <h2 className="text-xl font-semibold mb-4">Detalles del Producto</h2>
+              <ProductTabsDescription description={product.description ?? ""} />
+            </motion.div>
 
             {/* Añadir el componente FrequentlyBoughtTogether aquí */}
             <motion.div
@@ -435,6 +437,134 @@ export default function ProductDetails({ slug }: ProductDetailsProps) {
         </div>
       </div>
     </motion.main>
+  )
+}
+
+function ProductSimpleDescription({ description }: { description: string }) {
+  const [introContent, setIntroContent] = useState<string>("")
+
+  useEffect(() => {
+    if (!description) return
+
+    // Create a temporary div to parse the HTML
+    const tempDiv = document.createElement("div")
+    tempDiv.innerHTML = description
+
+    // Find all h2 elements
+    const h2Elements = tempDiv.querySelectorAll("h2")
+
+    if (h2Elements.length === 0) {
+      // If no h2 elements, just show the whole description
+      setIntroContent(description)
+      return
+    }
+
+    // Get content before the first h2 as intro section
+    let intro = ""
+    let currentNode = tempDiv.firstChild
+    while (currentNode && currentNode !== h2Elements[0]) {
+      const tempEl = document.createElement("div")
+      tempEl.appendChild(currentNode.cloneNode(true))
+      intro += tempEl.innerHTML
+      currentNode = currentNode.nextSibling
+    }
+
+    setIntroContent(intro)
+  }, [description])
+
+  if (!introContent) {
+    return null
+  }
+
+  return (
+    <div
+      className="text-secondary/90 leading-relaxed [&_p]:mb-4 [&_a]:text-blue-600 [&_a]:underline 
+          [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 
+          [&_h1]:text-2xl [&_h1]:font-bold [&_h3]:text-lg [&_h3]:font-medium 
+          [&_blockquote]:border-l-4 [&_blockquote]:border-gray-400 [&_blockquote]:pl-4 [&_blockquote]:italic 
+          [&_table]:w-full [&_table]:border [&_table]:border-gray-300 [&_table]:border-collapse [&_table]:mb-4
+          [&_th]:bg-gray-100 [&_th]:border [&_th]:border-gray-300 [&_th]:text-left [&_th]:px-4 [&_th]:py-3 [&_th]:font-bold 
+          [&_td]:border [&_td]:border-gray-300 [&_td]:px-4 [&_td]:py-3 [&_td]:text-gray-700"
+      dangerouslySetInnerHTML={{ __html: introContent }}
+    />
+  )
+}
+
+function ProductTabsDescription({ description }: { description: string }) {
+  const [sections, setSections] = useState<{ title: string; content: string }[]>([])
+  const [defaultTab, setDefaultTab] = useState<string>("")
+
+  useEffect(() => {
+    if (!description) return
+
+    // Create a temporary div to parse the HTML
+    const tempDiv = document.createElement("div")
+    tempDiv.innerHTML = description
+
+    // Find all h2 elements
+    const h2Elements = tempDiv.querySelectorAll("h2")
+
+    if (h2Elements.length === 0) {
+      // If no h2 elements, there's nothing to show in tabs
+      return
+    }
+
+    const parsedSections: { title: string; content: string }[] = []
+
+    // Process each h2 section
+    h2Elements.forEach((h2, index) => {
+      const title = h2.textContent || `Sección ${index + 1}`
+      // Start with empty content instead of h2.outerHTML
+      let sectionContent = ""
+
+      let nextNode = h2.nextElementSibling
+      while (nextNode && nextNode.tagName !== "H2") {
+        sectionContent += nextNode.outerHTML
+        nextNode = nextNode.nextElementSibling
+      }
+
+      parsedSections.push({ title, content: sectionContent })
+    })
+
+    setSections(parsedSections)
+    if (parsedSections.length > 0) {
+      setDefaultTab(parsedSections[0].title)
+    }
+  }, [description])
+
+  if (sections.length === 0) {
+    return null
+  }
+
+  return (
+    <Tabs defaultValue={defaultTab} className="w-full">
+      <TabsList className="mb-4 w-full flex flex-wrap h-auto">
+        {sections.map((section) => (
+          <TabsTrigger
+            key={section.title}
+            value={section.title}
+            className="flex-grow data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+          >
+            {section.title}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+      {sections.map((section) => (
+        <TabsContent key={section.title} value={section.title}>
+          <div
+            className="text-secondary/90 leading-relaxed [&_p]:mb-4 [&_a]:text-blue-600 [&_a]:underline 
+                      [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 
+                      [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:text-xl [&_h2]:font-semibold 
+                      [&_h3]:text-lg [&_h3]:font-medium 
+                      [&_blockquote]:border-l-4 [&_blockquote]:border-gray-400 [&_blockquote]:pl-4 [&_blockquote]:italic 
+                      [&_table]:w-full [&_table]:border [&_table]:border-gray-300 [&_table]:border-collapse [&_table]:mb-4
+                      [&_th]:bg-gray-100 [&_th]:border [&_th]:border-gray-300 [&_th]:text-left [&_th]:px-4 [&_th]:py-3 [&_th]:font-bold 
+                      [&_td]:border [&_td]:border-gray-300 [&_td]:px-4 [&_td]:py-3 [&_td]:text-gray-700"
+            dangerouslySetInnerHTML={{ __html: section.content }}
+          />
+        </TabsContent>
+      ))}
+    </Tabs>
   )
 }
 

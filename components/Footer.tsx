@@ -110,7 +110,7 @@ export function Footer() {
           <div className="content-section grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* Logo and Social */}
             <motion.div variants={itemVariants}>
-              <Image src="/logofooter.png" alt="Clefast Logo" width={200} height={40} className="mb-4" />
+              <Image src="/logofooter.png" alt="Clefast Logo" width={100} height={50} className="mb-4 object-contain" />
               <p className="text-gray-400 text-sm mb-4">
                 Productos líquidos biodegradables de alta calidad para la industria del lavado.
               </p>
@@ -126,13 +126,13 @@ export function Footer() {
 
             {/* Quick Links */}
             <motion.div variants={itemVariants}>
-              <h3 className="text-lg font-semibold mb-4">Enlaces Rápidos</h3>
+              <h3 className="text-lg font-semibold mb-4">Enlaces de Interes</h3>
               <ul className="space-y-2 text-sm">
                 <li>
                   <Link href="/" className="text-gray-400 hover:text-white">
                     Inicio
                   </Link>
-                </li>
+                </li> 
                 <li>
                   <Link href="/about" className="text-gray-400 hover:text-white">
                     Sobre Nosotros
