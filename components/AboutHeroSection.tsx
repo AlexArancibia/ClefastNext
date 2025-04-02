@@ -162,15 +162,20 @@ export function AboutHeroSection() {
       rel: 0,
       showinfo: 0,
       mute: 1,
-      playlist: videoId,
+      playlist: videoId, // Necesario para el loop
       cc_load_policy: 0,
       origin: typeof window !== "undefined" ? window.location.origin : "",
       autohide: 1,
       start: 0,
       hl: "es",
+      quality: 'hd1080',
+      vq: 'hd1080',
+      // Configuraciones adicionales para ocultar elementos
+      widget_referrer: typeof window !== "undefined" ? window.location.href : "",
+      enablecastapi: 0,
+      nocookie: true
     },
   }
-
   // Verificar si hay video para mostrar
   const hasVideo = Boolean(videoId) && !hasVideoError
 
@@ -198,7 +203,7 @@ export function AboutHeroSection() {
   }
 
   return (
-    <section className="relative w-full h-screen overflow-hidden">
+    <section className="relative w-full h-[94vh] overflow-hidden">
       {/* Fondo: Video o Imagen */}
       {hasVideo ? (
         <div className="absolute inset-0 overflow-hidden">
@@ -222,7 +227,7 @@ export function AboutHeroSection() {
               className={`absolute inset-0 w-full h-full ${
                 isVideoReady ? "opacity-100" : "opacity-0"
               } transition-opacity duration-300`}
-              iframeClassName="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[300%] h-[300%] min-w-full min-h-full"
+              iframeClassName="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[360%] h-[360%] md:w-[150%] md:h-[150%] min-w-full min-h-full"
             />
           </div>
 

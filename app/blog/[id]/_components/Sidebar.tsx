@@ -26,13 +26,16 @@ export function Sidebar() {
     return text.length > maxLength ? text.slice(0, maxLength) + "..." : text
   }
 
+  // Filtrar los contenidos para excluir los de tipo "PAGE"
+  const filteredContents = contents.filter(post => post.type !== "PAGE")
+
   return (
     <div className="bg-white rounded-lg shadow-sm p-3 lg:p-8 space-y-8 sticky top-0 z-[10]">
       <h2 className="text-xl font-semibold mb-4">Artículos Recientes</h2>
 
       {/* Recent Posts */}
       <div className="space-y-6 ">
-        {contents.slice(0, 5).map((post, index) => {
+        {filteredContents.slice(0, 5).map((post, index) => {
           const badgeColors = [
             "bg-orange-100 text-orange-800",
             "bg-purple-100 text-purple-800",
@@ -55,8 +58,8 @@ export function Sidebar() {
                   <Badge variant="secondary" className={cn("font-normal", badgeColor)}>
                     {post.type}
                   </Badge>
-                  <h3 className="font-medium leading-snug group-hover:text-primary transition-colors">{post.title}</h3>
-                  <p className="text-sm text-muted-foreground line-clamp-2">{getExcerpt(post.body)}</p>
+                  <h4 className="font-medium text-base leading-snug group-hover:text-primary transition-colors">{post.title}</h4>
+                  <p className="text-xs text-muted-foreground line-clamp-2">{getExcerpt(post.body)}</p>
                 </div>
               </article>
             </Link>
@@ -64,12 +67,14 @@ export function Sidebar() {
         })}
       </div>
 
-      <Link href="/blog" className="inline-flex items-center text-sm text-primary hover:underline transition-colors">
-        Read more
-        <svg className="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
-      </Link>
+      {filteredContents.length > 0 && (
+        <Link href="/blog" className="inline-flex items-center text-sm text-primary hover:underline transition-colors">
+          Ver más
+          <svg className="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </Link>
+      )}
     </div>
   )
 }
@@ -94,4 +99,3 @@ function SidebarSkeleton() {
     </div>
   )
 }
-

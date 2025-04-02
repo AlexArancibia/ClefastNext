@@ -83,7 +83,7 @@ function ProductFiltersContent({ onFilterChange, initialFilters, minPrice, maxPr
         })
       })
     })
-    return Object.fromEntries(Object.entries(attributes).map(([key, value]) => [key, Array.from(value).sort()]))
+    return Object.fromEntries(Object.entries(attributes).map(([key, value]) => [key, Array.from(value)]))
   }, [products])
 
   const handleCategoryChange = (categoryId: string) => {

@@ -134,20 +134,32 @@ export function Footer() {
                   </Link>
                 </li> 
                 <li>
-                  <Link href="/about" className="text-gray-400 hover:text-white">
+                  <Link href="/nosotros" className="text-gray-400 hover:text-white">
                     Sobre Nosotros
                   </Link>
                 </li>
                 <li>
-                  <Link href="/products" className="text-gray-400 hover:text-white">
+                  <Link href="/productos" className="text-gray-400 hover:text-white">
                     Productos
                   </Link>
                 </li>
                 <li>
-                  <Link href="/contact" className="text-gray-400 hover:text-white">
-                    Contacto
+                  <Link href="/promociones" className="text-gray-400 hover:text-white">
+                    Promociones
                   </Link>
                 </li>
+                <li>
+                  <Link href="/catalogo" className="text-gray-400 hover:text-white">
+                  Catálogo
+                  </Link>
+                </li>
+
+                  <li>
+                  <Link href="/blog" className="text-gray-400 hover:text-white">
+                  Blog
+                  </Link>
+                </li>
+          
               </ul>
             </motion.div>
 
@@ -168,6 +180,10 @@ export function Footer() {
                 <li>
                   <Link href="/reclamaciones" className="text-gray-400 hover:text-white">
                     Libro de Reclamaciónes
+                  </Link>
+                </li>      <li>
+                  <Link href="/contact" className="text-gray-400 hover:text-white">
+                    Contacto
                   </Link>
                 </li>
               </ul>

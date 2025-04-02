@@ -42,7 +42,7 @@ export function ProductSidebar({ product }: ProductSidebarProps) {
       </div>
 
       {/* Métodos de envío */}
-      <div className="border rounded-lg p-4">
+      <div className="border rounded-lg p-4 shadow-md bg-gray-50/90 shadow-slate-200/30">
         <h3 className="font-normal text-base mb-3 flex items-center gap-2">
           <Truck className="w-5 h-5" />
           Métodos de envío
@@ -62,7 +62,7 @@ export function ProductSidebar({ product }: ProductSidebarProps) {
       </div>
 
       {/* Métodos de pago */}
-      <div className="border rounded-lg p-4">
+      <div className="border rounded-lg p-4 shadow-md bg-gray-50/90 shadow-slate-200/30">
         <h3 className="font-normal text-base mb-3 flex items-center gap-2">
           <CreditCard className="w-5 h-5" />
           Métodos de pago
@@ -77,7 +77,7 @@ export function ProductSidebar({ product }: ProductSidebarProps) {
       </div>
 
       {/* Últimos productos */}
-      <div className="border rounded-lg p-4">
+      <div className="border rounded-lg p-4 shadow-md bg-gray-50/90 shadow-slate-200/30">
         <h3 className="font-normal text-base mb-3 flex items-center gap-2">
           <Package className="w-5 h-5" />
           Últimos productos

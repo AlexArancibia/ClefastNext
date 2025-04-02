@@ -5,14 +5,12 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import Image from "next/image"
-import { motion, useInView } from "framer-motion"
+import { motion } from "framer-motion"
 import { useRef } from "react"
 
 export function DeliveryHeroSection() {
   const { heroSections } = useMainStore()
   const isMobile = useMediaQuery("(max-width: 768px)")
-  const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, amount: 0.3 })
 
   const deliverySection = heroSections?.find(
     (section) => section.isActive && section.metadata?.section === "delivery"
@@ -31,7 +29,7 @@ export function DeliveryHeroSection() {
   } = deliverySection
 
   const bgImage = isMobile && mobileBackgroundImage ? mobileBackgroundImage : backgroundImage
-  const height = isMobile ? "500px" : "300px"
+  const height = isMobile ? "450px" : "300px"
 
   const textAlignClass = styles.textAlign || "text-left"
   const verticalAlignClass = styles.verticalAlign || "items-center"
@@ -42,7 +40,6 @@ export function DeliveryHeroSection() {
     <section className="overflow-hidden">
       <div className="container-section py-4 lg:py-8 mb-8">
         <motion.div
-          ref={ref} // Se pasó el ref aquí
           className={`content-section rounded-3xl overflow-hidden flex ${verticalAlignClass} relative`}
           style={{
             backgroundImage: `url(${bgImage})`,
@@ -51,7 +48,8 @@ export function DeliveryHeroSection() {
             height: height,
           }}
           initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.5 }}
         >
           <div
@@ -65,9 +63,10 @@ export function DeliveryHeroSection() {
           >
             <motion.div
               initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.5 }}
-              className={`max-w-xl p-8 ${textAlignClass}`}
+              className={`max-w-xl p-4 md:p-8 ${textAlignClass}`}
             >
               {title && (
                 <h2 className={`text-2xl md:text-3xl lg:text-4xl font-bold mb-4 ${titleColorClass}`}>{title}</h2>
@@ -87,7 +86,7 @@ export function DeliveryHeroSection() {
                       : ""
                   }
                 >
-                  <Button className="mt-4" asChild>
+                  <Button className="mb-24 md:mb-0 " asChild>
                     <Link href={buttonLink}>{buttonText}</Link>
                   </Button>
                 </div>
@@ -99,14 +98,15 @@ export function DeliveryHeroSection() {
           <motion.div
             className="absolute right-0 bottom-0 z-20"
             initial={{ x: 200, opacity: 0 }}
-            animate={isInView ? { x: 0, opacity: 1 } : {}}
+            whileInView={{ x: 0, opacity: 1 }}
+            viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 1.2, ease: "easeOut", delay: 0.2 }}
           >
             <Image
               src="/delivery.png"
               alt="Delivery"
-              width={isMobile ? 150 : 300}
-              height={isMobile ? 100 : 200}
+              width={isMobile ? 400 : 500}
+              height={isMobile ? 100 : 400}
               className="object-contain"
               priority
             />

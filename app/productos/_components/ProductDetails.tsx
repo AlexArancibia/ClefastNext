@@ -358,8 +358,22 @@ export default function ProductDetails({ slug }: ProductDetailsProps) {
                     Stock disponible: {selectedVariant.inventoryQuantity} unidades
                   </p>
                 )}
+                <Link href="#detalles"><p className="text-xs text-blue-800 font-semibold mt-2">Ver todas las características</p></Link>
+                
               </motion.div>
             </div>
+
+            
+
+            {/* Añadir el componente FrequentlyBoughtTogether aquí */}
+            <motion.div
+              id="detalles"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.6, duration: 0.5 }}
+            >
+              <FrequentlyBoughtTogether mainProduct={product} mainVariant={selectedVariant} fbt={product.fbt} />
+            </motion.div>
 
             {/* Product Description Tabs - New Section */}
             <motion.div
@@ -370,15 +384,6 @@ export default function ProductDetails({ slug }: ProductDetailsProps) {
             >
               <h2 className="text-xl font-semibold mb-4">Detalles del Producto</h2>
               <ProductTabsDescription description={product.description ?? ""} />
-            </motion.div>
-
-            {/* Añadir el componente FrequentlyBoughtTogether aquí */}
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.6, duration: 0.5 }}
-            >
-              <FrequentlyBoughtTogether mainProduct={product} mainVariant={selectedVariant} fbt={product.fbt} />
             </motion.div>
 
             {/* Carrusel de productos relacionados */}

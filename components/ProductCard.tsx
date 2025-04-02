@@ -36,7 +36,7 @@ export function ProductCard({ product }: ProductCardProps) {
       ? formatPrice(lowestPrice)
       : `${formatPrice(lowestPrice)} - ${formatPrice(highestPrice)}`
 
-  const isNew = new Date().getTime() - new Date(product.createdAt).getTime() < 30 * 24 * 60 * 60 * 1000
+  const isNew = new Date().getTime() - new Date(product.createdAt).getTime() < 7 * 24 * 60 * 60 * 1000
 
   const image = product.imageUrls[0] || "/placeholder.svg"
 
@@ -60,7 +60,7 @@ export function ProductCard({ product }: ProductCardProps) {
         <div className="absolute top-6 left-6 flex flex-col gap-2 z-10">
           {isNew && (
             <Badge variant="secondary" className="bg-white hover:bg-accent text-secondary">
-              NEW
+              Nuevo
             </Badge>
           )}
         </div>
