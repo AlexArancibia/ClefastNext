@@ -85,7 +85,7 @@ export function HeroSlide({ heroSection, animationDelay = 0 }: HeroSlideProps) {
       desktop: "text-[1em]",
     },
     backgroundPosition = "bg-center",
-    backgroundSize = "bg-cover",
+    backgroundSize = "bg-contain",
     animation = "none",
   } = styles
 
@@ -249,7 +249,7 @@ export function HeroSlide({ heroSection, animationDelay = 0 }: HeroSlideProps) {
                 src={bgImage || "/placeholder.svg"}
                 alt={title || "Background"}
                 fill
-                className={cn("object-cover", backgroundSize, backgroundPosition)}
+                className={cn("object-cover bg-center", backgroundSize, backgroundPosition)}
                 priority
                 sizes="100vw"
               />

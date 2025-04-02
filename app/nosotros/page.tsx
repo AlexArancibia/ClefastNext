@@ -195,7 +195,7 @@ export default function AboutPage() {
                 className="bg-white text-blue-700 hover:bg-blue-50 text-base px-8 py-6"
                 onClick={() =>
                   window.open(
-                    "https://wa.me/51978303475?text=Hola,%20me%20gustaría%20conocer%20más%20sobre%20los%20productos%20de%20Clefast",
+                    "https://wa.me/51960582623?text=Hola,%20me%20gustaría%20conocer%20más%20sobre%20los%20productos%20de%20Clefast",
                     "_blank",
                   )
                 }

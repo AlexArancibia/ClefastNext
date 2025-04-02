@@ -3,11 +3,12 @@
 import { PhoneIcon as WhatsApp } from "lucide-react"
 import { motion } from "framer-motion"
 import Image from "next/image"
+import { CONTACT_INFO } from "@/lib/constants"
 
 export function WhatsAppButton() {
   return (
     <motion.a
-      href="https://wa.me/51978303475"
+      href={`https://wa.me/51${CONTACT_INFO.phone.mobile.replace(/\s+/g, '')}`}
       target="_blank"
       rel="noopener noreferrer"
       className="fixed bottom-4 right-4 z-50 bg-[#25D366] text-white p-3 rounded-full shadow-lg hover:bg-[#128C7E] transition-colors duration-300"

@@ -292,6 +292,8 @@ export default function ProductDetails({ slug }: ProductDetailsProps) {
               >
                 <label className="text-lg font-medium mb-1.5 block">Descripción</label>
                 <ProductSimpleDescription description={product.description ?? ""} />
+                <Link href="#detalles"><p className="text-xs text-blue-800 font-semibold mt-2">Ver todas las características</p></Link>
+
 
                 {optionKeys.map((optionKey, index) => (
                   <div key={optionKey} className="space-y-2">
@@ -358,7 +360,6 @@ export default function ProductDetails({ slug }: ProductDetailsProps) {
                     Stock disponible: {selectedVariant.inventoryQuantity} unidades
                   </p>
                 )}
-                <Link href="#detalles"><p className="text-xs text-blue-800 font-semibold mt-2">Ver todas las características</p></Link>
                 
               </motion.div>
             </div>
@@ -394,14 +395,14 @@ export default function ProductDetails({ slug }: ProductDetailsProps) {
                 transition={{ delay: 0.7, duration: 0.5 }}
                 className="mt-12"
               >
-                <h2 className="text-xl font-normal mb-6">Productos relacionados</h2>
+                <h2 className="text-xl font-semibold mb-6">Productos relacionados</h2>
                 <div className="relative">
                   <div className="overflow-hidden py-4" ref={emblaRef}>
                     <div className="flex">
                       {relatedProducts.map((relatedProduct) => (
                         <div
                           key={relatedProduct.id}
-                          className="flex-[0_0_100%] min-w-0 sm:flex-[0_0_50%] md:flex-[0_0_33.33%] lg:flex-[0_0_25%] px-2"
+                          className="flex-[0_0_100%] min-w-0 sm:flex-[0_0_50%] md:flex-[0_0_33.33%]   px-2"
                         >
                           <ProductCard product={relatedProduct} />
                         </div>

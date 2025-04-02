@@ -227,7 +227,7 @@ export function AboutHeroSection() {
               className={`absolute inset-0 w-full h-full ${
                 isVideoReady ? "opacity-100" : "opacity-0"
               } transition-opacity duration-300`}
-              iframeClassName="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[360%] h-[360%] md:w-[150%] md:h-[150%] min-w-full min-h-full"
+              iframeClassName="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[360%] h-[360%] md:w-[123%] md:h-[123%] min-w-full min-h-full"
             />
           </div>
 
