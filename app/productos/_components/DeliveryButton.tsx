@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 export function DeliveryButton() {
   const [open, setOpen] = useState(false);
@@ -41,12 +41,13 @@ export function DeliveryButton() {
       </motion.div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-[90%] sm:max-w-[600px] z-[456] rounded-xl p-6 overflow-hidden">
+        <DialogTitle></DialogTitle>
+        <DialogContent className="max-w-[90%] sm:max-w-[800px] z-[456] rounded-xl p-6 overflow-hidden">
           <Image 
             src="/delivery-image.jpg" 
             alt="Delivery" 
-            width={300} 
-            height={200} 
+            width={800} 
+            height={600} 
             className="rounded-lg shadow-lg" 
           />
         </DialogContent>

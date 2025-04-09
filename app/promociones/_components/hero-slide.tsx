@@ -10,12 +10,17 @@ import { useMediaQuery } from "@/hooks/use-media-query"
 import { useMemo, useState, useEffect, useRef } from "react"
 import YouTube from "react-youtube"
 
+// Caché global para los reproductores de YouTube
+// Cambiamos a un enfoque más simple sin intentar reutilizar instancias
+const videoLoadedState: Record<string, boolean> = {}
+
 interface HeroSlideProps {
   heroSection: HeroSectionType
   animationDelay?: number
+  preload?: boolean
 }
 
-export function HeroSlide({ heroSection, animationDelay = 0 }: HeroSlideProps) {
+export function HeroSlide({ heroSection, animationDelay = 0, preload = false }: HeroSlideProps) {
   console.log("HeroSlide - Rendering with heroSection:", heroSection.id)
 
   // Estados para el video
@@ -23,6 +28,7 @@ export function HeroSlide({ heroSection, animationDelay = 0 }: HeroSlideProps) {
   const [videoId, setVideoId] = useState<string>("")
   const [hasVideoError, setHasVideoError] = useState(false)
   const playerRef = useRef<any>(null)
+  const slideIdRef = useRef<string>(heroSection.id)
 
   const { styles = {}, metadata = {} } = heroSection
   const isMobile = useMediaQuery("(max-width: 768px)")
@@ -67,7 +73,7 @@ export function HeroSlide({ heroSection, animationDelay = 0 }: HeroSlideProps) {
     contentPadding = {
       mobile: "py-8 px-4",
       tablet: "py-12 px-6",
-      desktop: "py-16 px-8",
+      desktop: " ",
     },
     height = {
       mobile: "min-h-screen",
@@ -84,18 +90,33 @@ export function HeroSlide({ heroSection, animationDelay = 0 }: HeroSlideProps) {
       tablet: "text-[1em]",
       desktop: "text-[1em]",
     },
-    backgroundPosition = "bg-center",
-    backgroundSize = "bg-contain",
+    backgroundPosition = "bg-top md:bg-bottom",
+    backgroundSize = "bg-cover",
     animation = "none",
   } = styles
 
   // Determinar alineación vertical
-  const verticalAlignClass =
-    verticalAlign === "items-start" ? "items-start" : verticalAlign === "items-end" ? "items-end" : "items-center"
+  const verticalAlignClass = useMemo(() => {
+    // Convertir valores de estilo a clases de Tailwind
+    if (verticalAlign === "top" || verticalAlign === "items-start") return "items-start"
+    if (verticalAlign === "bottom" || verticalAlign === "items-end") return "items-end"
+    return "items-center" // default
+  }, [verticalAlign])
 
   // Determinar alineación horizontal
-  const textAlignClass =
-    textAlign === "text-center" ? "text-center" : textAlign === "text-right" ? "text-right" : "text-left"
+  const textAlignClass = useMemo(() => {
+    // Convertir valores de estilo a clases de Tailwind
+    if (textAlign === "center" || textAlign === "text-center") return "text-center"
+    if (textAlign === "right" || textAlign === "text-right") return "text-right"
+    return "text-left" // default
+  }, [textAlign])
+
+  // Determinar clases de justificación para el contenedor flex
+  const justifyClass = useMemo(() => {
+    if (textAlignClass === "text-center") return "justify-center"
+    if (textAlignClass === "text-right") return "justify-end"
+    return "justify-start" // default
+  }, [textAlignClass])
 
   // Determinar ancho de contenido basado en tamaño de pantalla
   const contentWidthValue = useMemo(() => {
@@ -132,6 +153,15 @@ export function HeroSlide({ heroSection, animationDelay = 0 }: HeroSlideProps) {
     return contentPadding.desktop
   }, [isMobile, isTablet, contentPadding])
 
+  console.log("HeroSlide - Style values:", {
+    textAlign,
+    verticalAlign,
+    textAlignClass,
+    verticalAlignClass,
+    justifyClass,
+    contentWidthValue,
+  })
+
   // Extraer ID de video de YouTube
   useEffect(() => {
     const extractVideoId = (url: string): string => {
@@ -162,7 +192,15 @@ export function HeroSlide({ heroSection, animationDelay = 0 }: HeroSlideProps) {
     if (bgVideo) {
       const id = extractVideoId(bgVideo)
       setVideoId(id)
-      setIsVideoReady(false)
+
+      // Verificar si ya hemos cargado este video antes
+      if (id && videoLoadedState[id]) {
+        console.log("HeroSlide - Video was previously loaded:", id)
+        // No hacemos nada especial, solo marcamos que ya se ha cargado antes
+      } else {
+        setIsVideoReady(false)
+      }
+
       setHasVideoError(false)
       console.log("HeroSlide - Set video ID:", id)
     } else {
@@ -174,23 +212,46 @@ export function HeroSlide({ heroSection, animationDelay = 0 }: HeroSlideProps) {
 
   // Manejadores para el reproductor de YouTube
   const onVideoReady = (event: any) => {
-    console.log("HeroSlide - YouTube player ready")
-    playerRef.current = event.target
+    console.log("HeroSlide - YouTube player ready for ID:", videoId)
 
-    // Asegurarnos de que el video está silenciado y se reproduce automáticamente
-    event.target.mute()
-    event.target.playVideo()
+    try {
+      // Verificar que el evento y el target sean válidos
+      if (!event || !event.target) {
+        console.error("HeroSlide - Invalid event or target in onVideoReady")
+        return
+      }
 
-    // Establecer isReady después de un pequeño retraso para asegurar que el video está reproduciéndose
-    setTimeout(() => {
-      console.log("HeroSlide - Video playback started")
-      setIsVideoReady(true)
-    }, 300)
+      // Guardar la referencia al reproductor
+      playerRef.current = event.target
+
+      // Marcar este video como cargado
+      if (videoId) {
+        videoLoadedState[videoId] = true
+        console.log("HeroSlide - Marked video as loaded:", videoId)
+      }
+
+      // Asegurarnos de que el video está silenciado y se reproduce automáticamente
+      event.target.mute()
+      event.target.playVideo()
+
+      // Establecer isReady después de un pequeño retraso para asegurar que el video está reproduciéndose
+      setTimeout(() => {
+        console.log("HeroSlide - Video playback started")
+        setIsVideoReady(true)
+      }, 100) // Reducido a 100ms para una carga más rápida
+    } catch (error) {
+      console.error("HeroSlide - Error in onVideoReady:", error)
+    }
   }
 
   const onVideoError = (event: any) => {
     console.error("HeroSlide - Error loading YouTube video:", event)
     setHasVideoError(true)
+
+    // Marcar este video como no cargado para futuros intentos
+    if (videoId) {
+      videoLoadedState[videoId] = false
+    }
   }
 
   // Opciones para el reproductor de YouTube
@@ -203,18 +264,54 @@ export function HeroSlide({ heroSection, animationDelay = 0 }: HeroSlideProps) {
       disablekb: 1,
       enablejsapi: 1,
       fs: 0,
-      iv_load_policy: 3, // Hide video annotations
+      iv_load_policy: 3,
       loop: 1,
       modestbranding: 1,
       playsinline: 1,
+      
       rel: 0,
       showinfo: 0,
       mute: 1,
-      playlist: videoId, // Required for looping
-      cc_load_policy: 0, // Disable closed captions
+      playlist: videoId, // Necesario para el loop
+      cc_load_policy: 0,
       origin: typeof window !== "undefined" ? window.location.origin : "",
+      autohide: 1,
+      start: 0,
+      hl: "es",
+      quality: 'hd1080',
+      vq: 'hd1080',
+      // Configuraciones adicionales para ocultar elementos
+      widget_referrer: typeof window !== "undefined" ? window.location.href : "",
+      enablecastapi: 0,
+      nocookie: true
     },
   }
+
+  // Efecto para manejar la visibilidad del slide
+  useEffect(() => {
+    // Si tenemos un reproductor y el slide está visible, reproducir el video
+    if (playerRef.current && videoId) {
+      console.log("HeroSlide - Resuming video playback for ID:", videoId)
+      try {
+        // Verificar que el reproductor tenga el método playVideo antes de llamarlo
+        if (playerRef.current.playVideo && typeof playerRef.current.playVideo === "function") {
+          playerRef.current.playVideo()
+        } else {
+          console.warn("HeroSlide - Player exists but playVideo method is not available")
+        }
+      } catch (error) {
+        console.error("HeroSlide - Error resuming video playback:", error)
+      }
+    }
+
+    // Limpiar al desmontar
+    return () => {
+      // Simplemente limpiar la referencia al desmontar
+      // Eliminamos la llamada a pauseVideo que estaba causando el error
+      console.log("HeroSlide - Cleaning up player reference")
+      playerRef.current = null
+    }
+  }, [videoId])
 
   // Obtener estilo de overlay
   const getOverlayStyle = () => {
@@ -238,7 +335,7 @@ export function HeroSlide({ heroSection, animationDelay = 0 }: HeroSlideProps) {
   console.log("HeroSlide - Has video:", hasVideo, "Video ID:", videoId, "Has error:", hasVideoError)
 
   return (
-    <div className={cn("relative w-full overflow-hidden", heightValue)}>
+    <div className={cn("relative w-full h-[92vh]")} >
       {/* Fondo: Video o Imagen */}
       {hasVideo ? (
         <div className="absolute inset-0 overflow-hidden">
@@ -249,14 +346,15 @@ export function HeroSlide({ heroSection, animationDelay = 0 }: HeroSlideProps) {
                 src={bgImage || "/placeholder.svg"}
                 alt={title || "Background"}
                 fill
-                className={cn("object-cover bg-center", backgroundSize, backgroundPosition)}
+                className={cn("object-cover ", backgroundSize, backgroundPosition)}
                 priority
                 sizes="100vw"
+                quality={100}
               />
             </div>
           )}
 
-          <div className="absolute inset-0 w-full h-full">
+          <div className="absolute inset-0 w-full h-[92vh] mt-[8vh]">
             <YouTube
               videoId={videoId}
               opts={videoOpts}
@@ -264,8 +362,8 @@ export function HeroSlide({ heroSection, animationDelay = 0 }: HeroSlideProps) {
               onError={onVideoError}
               className={`absolute inset-0 w-full h-full ${
                 isVideoReady ? "opacity-100" : "opacity-0"
-              } transition-opacity duration-500`}
-              iframeClassName="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[300%] h-[300%] min-w-full min-h-full"
+              } transition-opacity duration-300`}
+              iframeClassName="absolute top-[45%] left-1/2 transform -translate-x-1/2 -translate-y-1/2  h-[125%] w-[120%]  min-h-full"
             />
           </div>
 
@@ -274,90 +372,107 @@ export function HeroSlide({ heroSection, animationDelay = 0 }: HeroSlideProps) {
         </div>
       ) : bgImage ? (
         <div className="absolute inset-0">
-          <Image
-            src={bgImage || "/placeholder.svg"}
-            alt={title || "Hero background"}
-            fill
-            priority
-            className={cn("object-cover", backgroundSize, backgroundPosition)}
-            sizes="100vw"
-            quality={90}
-          />
-          <div className="absolute inset-0" style={getOverlayStyle()} />
-        </div>
+        <Image
+          src={bgImage || "/placeholder.svg"}
+          alt={title || "Hero background"}
+          fill
+          priority
+          className={cn("object-cover bg-center")}
+          quality={100}
+        />
+        <div className="absolute inset-0" style={getOverlayStyle()} />
+      </div>
       ) : (
         <div className="absolute inset-0 bg-gradient-to-r from-gray-900 to-gray-800" />
       )}
 
-      {/* Contenido */}
-      <div className={cn("relative z-10 h-full flex", verticalAlignClass)}>
-        <div className="container mx-auto px-4 md:px-6">
-          <motion.div
-            className={cn(
-              "space-y-6",
-              textAlignClass,
-              {
-                "mx-auto": textAlignClass === "text-center",
-                "ml-auto": textAlignClass === "text-right",
-                "mr-auto": textAlignClass === "text-left",
-              },
-              contentWidthValue,
-              paddingValue,
-            )}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: 0.8,
-              delay: 0.2 + animationDelay,
+      {/* Contenido - Estructura simplificada */}
+      <div
+        className="absolute inset-0 flex w-full h-full "
+        style={{
+          display: "flex",
+          alignItems:
+            verticalAlignClass === "items-start"
+              ? "flex-start"
+              : verticalAlignClass === "items-end"
+                ? "flex-end"
+                : "center",
+          height: "100%",
+        }}
+      >
+        <div className="container mx-auto px-4 md:px-6 h-full flex">
+          <div
+            className={cn("w-full flex   md:pb-20 items-start md:items-center", justifyClass)}
+            style={{
+              height: "100%",
+              display: "flex",
+ 
             }}
           >
-            {title && (
-              <motion.h1
-                className={cn(titleColor, titleSizeValue)}
-                style={{
-                  textShadow: textShadow !== "none" ? textShadow : undefined,
-                  lineHeight: 1.2,
-                }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: animationDelay }}
-              >
-                {title}
-              </motion.h1>
-            )}
-
-            {subtitle && (
-              <motion.p
-                className={cn(subtitleColor, subtitleSizeValue)}
-                style={{
-                  textShadow: textShadow !== "none" ? textShadow : undefined,
-                  lineHeight: 1.5,
-                }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 + animationDelay }}
-              >
-                {subtitle}
-              </motion.p>
-            )}
-
-            {buttonText && buttonLink && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 + animationDelay }}
-              >
-                <Button
-                  variant={buttonVariant as any}
-                  size={buttonSize as any}
-                  className="font-medium hover:scale-105 transition-transform shadow-lg"
-                  asChild
+            <motion.div
+              className={cn("space-y-6 ", textAlignClass, contentWidthValue, paddingValue)}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.8,
+                delay: 0.2 + animationDelay,
+              }}
+            >
+              {title && (
+                <motion.h1
+                  className={cn(titleColor, titleSizeValue)}
+                  style={{
+                    textShadow: textShadow !== "none" ? textShadow : undefined,
+                    lineHeight: 1.2,
+                  }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: animationDelay }}
                 >
-                  <Link href={buttonLink}>{buttonText}</Link>
-                </Button>
-              </motion.div>
-            )}
-          </motion.div>
+                  {title}
+                </motion.h1>
+              )}
+
+              {subtitle && (
+                <motion.p
+                  className={cn(subtitleColor, subtitleSizeValue)}
+                  style={{
+                    textShadow: textShadow !== "none" ? textShadow : undefined,
+                    lineHeight: 1.5,
+                  }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.1 + animationDelay }}
+                >
+                  {subtitle}
+                </motion.p>
+              )}
+
+              {buttonText && buttonLink && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 + animationDelay }}
+                  className={cn(
+                    textAlignClass === "text-center"
+                      ? "flex justify-center"
+                      : textAlignClass === "text-right"
+                        ? "flex justify-end"
+                        : "",
+                  )}
+                >
+                  <Button
+                    variant={buttonVariant as any}
+                    size={buttonSize as any}
+                    className="font-medium hover:scale-105 transition-transform shadow-lg"
+                    asChild
+                  >
+                    <Link href={buttonLink}>{buttonText}</Link>
+                  </Button>
+                </motion.div>
+              )}
+            </motion.div>
+          </div>
         </div>
       </div>
     </div>

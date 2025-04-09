@@ -262,11 +262,8 @@ export function HeroCarousel({ heroSections }: HeroCarouselProps) {
     <div className="w-screen overflow-hidden relative mx-auto" ref={carouselRef}>
       {/* Carrusel principal */}
       <div
-        className="relative"
-        style={{
-          height: "calc(100vh - 60px)",
-          willChange: "transform", // Optimización de rendimiento
-        }}
+        className="relative h-[92vh] "
+ 
       >
         {/* Cambiamos el modo de "wait" a "sync" para que los slides se superpongan durante la transición */}
         <AnimatePresence initial={false} custom={direction} mode="sync">

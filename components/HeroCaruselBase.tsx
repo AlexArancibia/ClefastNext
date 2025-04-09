@@ -19,12 +19,12 @@ interface HeroCarouselBaseProps {
 
 export function HeroCarouselBase({
   heroSections,
-  autoplayInterval = 5000,
+  autoplayInterval = 8000,
   transitionDuration = 700,
   showControls = true,
   showIndicators = true,
   showPauseButton = true,
-  containerHeight = "calc(100vh - 60px)",
+  containerHeight = "calc(92vh)",
 }: HeroCarouselBaseProps) {
   // Estados para el carrusel
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -271,11 +271,11 @@ export function HeroCarouselBase({
     <div className="w-full overflow-hidden relative" ref={carouselRef}>
       {/* Carrusel principal */}
       <div
-        className="relative"
-        style={{
-          height: containerHeight,
-          willChange: "transform", // Optimización de rendimiento
-        }}
+        className="relative h-[92vh]  "
+        // style={{
+        //   height: containerHeight,
+        //   willChange: "transform", // Optimización de rendimiento
+        // }}
       >
         {/* Cambiamos el modo de "wait" a "sync" para que los slides se superpongan durante la transición */}
         <AnimatePresence initial={false} custom={direction} mode="sync">

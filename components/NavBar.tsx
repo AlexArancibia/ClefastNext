@@ -85,9 +85,9 @@ function NavbarContent() {
   }
 
   return (
-    <nav className="bg-background/100 backdrop-blur-md border-b sticky top-0 z-[180]">
-      <div className="container-section py-3">
-        <div className="content-section">
+    <nav className="bg-background/100 backdrop-blur-mdborder-b sticky top-0 z-[180]">
+      <div className="container-section py-3 flex items-center  h-[8vh] ">
+        <div className="content-section ">
           <div className="flex items-center justify-between">
             {/* Logo */}
             <div className="w-1/4 lg:w-1/4">

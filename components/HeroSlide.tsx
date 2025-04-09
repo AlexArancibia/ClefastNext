@@ -90,7 +90,7 @@ export function HeroSlide({ heroSection, animationDelay = 0, preload = false }: 
       tablet: "text-[1em]",
       desktop: "text-[1em]",
     },
-    backgroundPosition = "bg-top md:bg-center",
+    backgroundPosition = "bg-top md:bg-bottom",
     backgroundSize = "bg-cover",
     animation = "none",
   } = styles
@@ -264,21 +264,26 @@ export function HeroSlide({ heroSection, animationDelay = 0, preload = false }: 
       disablekb: 1,
       enablejsapi: 1,
       fs: 0,
-      iv_load_policy: 3, // Hide video annotations
+      iv_load_policy: 3,
       loop: 1,
       modestbranding: 1,
       playsinline: 1,
+      
       rel: 0,
       showinfo: 0,
       mute: 1,
-      playlist: videoId, // Required for looping
-      cc_load_policy: 0, // Disable closed captions
+      playlist: videoId, // Necesario para el loop
+      cc_load_policy: 0,
       origin: typeof window !== "undefined" ? window.location.origin : "",
-      // Nuevas opciones para mejorar la carga
       autohide: 1,
       start: 0,
       hl: "es",
+      quality: 'hd1080',
+      vq: 'hd1080',
+      // Configuraciones adicionales para ocultar elementos
       widget_referrer: typeof window !== "undefined" ? window.location.href : "",
+      enablecastapi: 0,
+      nocookie: true
     },
   }
 
@@ -330,7 +335,7 @@ export function HeroSlide({ heroSection, animationDelay = 0, preload = false }: 
   console.log("HeroSlide - Has video:", hasVideo, "Video ID:", videoId, "Has error:", hasVideoError)
 
   return (
-    <div className={cn("relative w-full", heightValue)} style={{ height: "100%" }}>
+    <div className={cn("relative w-full h-[92vh]")} >
       {/* Fondo: Video o Imagen */}
       {hasVideo ? (
         <div className="absolute inset-0 overflow-hidden">
@@ -341,14 +346,14 @@ export function HeroSlide({ heroSection, animationDelay = 0, preload = false }: 
                 src={bgImage || "/placeholder.svg"}
                 alt={title || "Background"}
                 fill
-                className={cn("object-cover", backgroundSize, backgroundPosition)}
+                className={cn("object-cover ", backgroundSize, backgroundPosition)}
                 priority
                 sizes="100vw"
               />
             </div>
           )}
 
-          <div className="absolute inset-0 w-full h-full">
+          <div className="absolute inset-0 w-full h-[92vh] mt-[8vh]">
             <YouTube
               videoId={videoId}
               opts={videoOpts}
@@ -357,7 +362,7 @@ export function HeroSlide({ heroSection, animationDelay = 0, preload = false }: 
               className={`absolute inset-0 w-full h-full ${
                 isVideoReady ? "opacity-100" : "opacity-0"
               } transition-opacity duration-300`}
-              iframeClassName="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[300%] h-[300%] min-w-full min-h-full"
+              iframeClassName="absolute top-[45%] left-1/2 transform -translate-x-1/2 -translate-y-1/2  h-[125%] w-[120%]  min-h-full"
             />
           </div>
 
@@ -366,17 +371,16 @@ export function HeroSlide({ heroSection, animationDelay = 0, preload = false }: 
         </div>
       ) : bgImage ? (
         <div className="absolute inset-0">
-          <Image
-            src={bgImage || "/placeholder.svg"}
-            alt={title || "Hero background"}
-            fill
-            priority
-            className={cn("object-cover", backgroundSize, backgroundPosition)}
-            sizes="100vw"
-            quality={90}
-          />
-          <div className="absolute inset-0" style={getOverlayStyle()} />
-        </div>
+        <Image
+          src={bgImage || "/placeholder.svg"}
+          alt={title || "Hero background"}
+          fill
+          priority
+          className={cn("object-cover bg-center", backgroundSize, backgroundPosition)}
+          quality={100}
+        />
+        <div className="absolute inset-0" style={getOverlayStyle()} />
+      </div>
       ) : (
         <div className="absolute inset-0 bg-gradient-to-r from-gray-900 to-gray-800" />
       )}
@@ -397,7 +401,7 @@ export function HeroSlide({ heroSection, animationDelay = 0, preload = false }: 
       >
         <div className="container mx-auto px-4 md:px-6 h-full flex">
           <div
-            className={cn("w-full flex pt-20 md:pb-20 items-start md:items-center", justifyClass)}
+            className={cn("w-full flex   md:pb-20 items-start md:items-center", justifyClass)}
             style={{
               height: "100%",
               display: "flex",

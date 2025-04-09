@@ -67,7 +67,7 @@ export function HeroSection() {
   }
 
   return (
-    <div className="w-full overflow-hidden -mt-[60px]">
+    <div className="w-full overflow-hidden ">
       <HeroCarouselBase heroSections={filteredSections} autoplayInterval={10000} containerHeight="calc(100vh)" />
     </div>
   )

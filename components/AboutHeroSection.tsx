@@ -203,7 +203,7 @@ export function AboutHeroSection() {
   }
 
   return (
-    <section className="relative w-full h-[94vh] overflow-hidden">
+    <section className="relative w-full h-[92vh] overflow-hidden">
       {/* Fondo: Video o Imagen */}
       {hasVideo ? (
         <div className="absolute inset-0 overflow-hidden">
