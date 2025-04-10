@@ -69,16 +69,20 @@ export default function ProductDetails({ slug }: ProductDetailsProps) {
     return Object.fromEntries(Object.entries(options).map(([key, value]) => [key, Array.from(value)]))
   }, [product])
 
-  const allImages = useMemo(() => {
-    if (!product) return []
+  // Modificado para mostrar solo imágenes generales y la de la variante seleccionada
+  const displayImages = useMemo(() => {
+    if (!product || !selectedVariant) return []
+
+    // Imágenes generales del producto
     const images = [...product.imageUrls]
-    product.variants.forEach((variant) => {
-      if (variant.imageUrl && !images.includes(variant.imageUrl)) {
-        images.push(variant.imageUrl)
-      }
-    })
+
+    // Añadir la imagen de la variante seleccionada si existe y no está ya incluida
+    if (selectedVariant.imageUrl && !images.includes(selectedVariant.imageUrl)) {
+      images.push(selectedVariant.imageUrl)
+    }
+
     return images
-  }, [product])
+  }, [product, selectedVariant])
 
   const getVariantForImage = (imageUrl: string): ProductVariant | null => {
     if (!product) return null
@@ -126,7 +130,7 @@ export default function ProductDetails({ slug }: ProductDetailsProps) {
 
   const handleThumbnailClick = (index: number) => {
     setCurrentImageIndex(index)
-    const variant = getVariantForImage(allImages[index])
+    const variant = getVariantForImage(displayImages[index])
     if (variant) {
       setSelectedVariant(variant)
     }
@@ -146,10 +150,15 @@ export default function ProductDetails({ slug }: ProductDetailsProps) {
     )
     if (newVariant && isVariantAvailable(newVariant)) {
       setSelectedVariant(newVariant)
-      const variantImageIndex = allImages.findIndex((img) => img === newVariant.imageUrl)
-      if (variantImageIndex !== -1) {
-        setCurrentImageIndex(variantImageIndex)
+
+      // Si la variante tiene una imagen, buscarla en displayImages
+      if (newVariant.imageUrl) {
+        const variantImageIndex = displayImages.findIndex((img) => img === newVariant.imageUrl)
+        if (variantImageIndex !== -1) {
+          setCurrentImageIndex(variantImageIndex)
+        }
       }
+
       setQuantity(1) // Reset quantity when changing variant
     }
   }
@@ -242,17 +251,17 @@ export default function ProductDetails({ slug }: ProductDetailsProps) {
                     onMouseMove={handleMouseMove}
                   >
                     <Image
-                      src={allImages[currentImageIndex] || "/placeholder.svg"}
+                      src={displayImages[currentImageIndex] || "/placeholder.svg"}
                       alt={product.title}
                       fill
-                      className={`object-contain p-4 transition-transform duration-200 ease-out ${isZoomed ? "scale-150" : "scale-100"}`}
+                      className={`object-contain p-4 transition-transform duration-200 ease-out ${isZoomed ? "scale-[200%]" : "scale-100"}`}
                       style={{
                         transformOrigin: `${mousePosition.x}% ${mousePosition.y}%`,
                       }}
                     />
-                    {getVariantForImage(allImages[currentImageIndex]) && (
+                    {getVariantForImage(displayImages[currentImageIndex]) && (
                       <Badge className="absolute top-2 right-2 bg-white" variant="outline">
-                        {Object.values(getVariantForImage(allImages[currentImageIndex])!.attributes).join(" - ")}
+                        {Object.values(getVariantForImage(displayImages[currentImageIndex])!.attributes).join(" - ")}
                       </Badge>
                     )}
                   </motion.div>
@@ -260,7 +269,7 @@ export default function ProductDetails({ slug }: ProductDetailsProps) {
 
                 {/* Galería de miniaturas */}
                 <div className="flex gap-2 overflow-x-auto pb-2 p-2 scrollbar-hide">
-                  {allImages.map((url, index) => (
+                  {displayImages.map((url, index) => (
                     <motion.button
                       key={`${url}-${index}`}
                       onClick={() => handleThumbnailClick(index)}
@@ -292,8 +301,9 @@ export default function ProductDetails({ slug }: ProductDetailsProps) {
               >
                 <label className="text-lg font-medium mb-1.5 block">Descripción</label>
                 <ProductSimpleDescription description={product.description ?? ""} />
-                <Link href="#detalles"><p className="text-xs text-blue-800 font-semibold mt-2">Ver todas las características</p></Link>
-
+                <Link href="#detalles">
+                  <p className="text-xs text-blue-800 font-semibold mt-2">Ver todas las características</p>
+                </Link>
 
                 {optionKeys.map((optionKey, index) => (
                   <div key={optionKey} className="space-y-2">
@@ -360,11 +370,8 @@ export default function ProductDetails({ slug }: ProductDetailsProps) {
                     Stock disponible: {selectedVariant.inventoryQuantity} unidades
                   </p>
                 )}
-                
               </motion.div>
             </div>
-
-            
 
             {/* Añadir el componente FrequentlyBoughtTogether aquí */}
             <motion.div
@@ -607,4 +614,3 @@ function ProductDetailsSkeleton() {
     </div>
   )
 }
-
