@@ -44,7 +44,7 @@ export function DeliveryButton() {
         <DialogTitle></DialogTitle>
         <DialogContent className="max-w-[90%] sm:max-w-[800px] z-[456] rounded-xl p-6 overflow-hidden">
           <Image 
-            src="/delivery-image.jpg" 
+            src="/delivery-image.png" 
             alt="Delivery" 
             width={800} 
             height={600} 

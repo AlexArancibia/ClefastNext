@@ -69,19 +69,22 @@ export default function ProductDetails({ slug }: ProductDetailsProps) {
     return Object.fromEntries(Object.entries(options).map(([key, value]) => [key, Array.from(value)]))
   }, [product])
 
-  // Modificado para mostrar solo imágenes generales y la de la variante seleccionada
+  // Modificado para mostrar solo la imagen de la variante seleccionada cuando hay variaciones
   const displayImages = useMemo(() => {
     if (!product || !selectedVariant) return []
 
-    // Imágenes generales del producto
-    const images = [...product.imageUrls]
+    // Si el producto tiene variaciones (más de una variante o atributos específicos)
+    const hasVariations =
+      product.variants.length > 1 ||
+      (product.variants.length === 1 && Object.keys(product.variants[0].attributes).some((key) => key !== "type"))
 
-    // Añadir la imagen de la variante seleccionada si existe y no está ya incluida
-    if (selectedVariant.imageUrl && !images.includes(selectedVariant.imageUrl)) {
-      images.push(selectedVariant.imageUrl)
+    if (hasVariations && selectedVariant.imageUrl) {
+      // Si tiene variaciones y la variante seleccionada tiene imagen, mostrar solo esa imagen
+      return [selectedVariant.imageUrl]
+    } else {
+      // Si no tiene variaciones o la variante no tiene imagen, mostrar las imágenes generales
+      return [...product.imageUrls]
     }
-
-    return images
   }, [product, selectedVariant])
 
   const getVariantForImage = (imageUrl: string): ProductVariant | null => {
